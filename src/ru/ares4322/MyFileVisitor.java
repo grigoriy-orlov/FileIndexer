@@ -4,15 +4,15 @@
  */
 package ru.ares4322;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.AbstractQueue;
+import java.util.concurrent.locks.Condition;
 
 /**
  *
@@ -20,12 +20,14 @@ import java.nio.file.attribute.BasicFileAttributes;
  */
 public class MyFileVisitor implements FileVisitor<Path> {
 
-	private Path tmpFile;
-	private Charset charset;
 	private PrintWriter writer;
+	protected Condition condition;
+	protected AbstractQueue<Path> pathQueue;
 
-	MyFileVisitor(PrintWriter writer){
+	MyFileVisitor(PrintWriter writer, Condition condition, AbstractQueue<Path> pathQueue) {
 		this.writer = writer;
+		this.condition = condition;
+		this.pathQueue = pathQueue;
 	}
 
 	/**
@@ -38,9 +40,18 @@ public class MyFileVisitor implements FileVisitor<Path> {
 
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-		this.writer.println(file.getFileName());
-		
-		return FileVisitResult.CONTINUE;
+		FileVisitResult result = FileVisitResult.CONTINUE;
+		if (Files.isDirectory(file)) {
+			this.pathQueue.add(file);
+			this.condition.signalAll();
+			this.writer.println(file.toRealPath());
+		} else if (Files.isRegularFile(file)) {
+			this.writer.println(file.toRealPath());
+		} else if (Files.isSymbolicLink(file)) {
+			System.out.println(file.toRealPath() + " is symbolic link (not write)");
+		}
+
+		return result;
 	}
 
 	/**
@@ -48,9 +59,11 @@ public class MyFileVisitor implements FileVisitor<Path> {
 	 */
 	@Override
 	public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+		System.out.println("ERROR: visit failed file "+file.toRealPath());
 		return FileVisitResult.CONTINUE;
 	}
 
+	//@todo здесь можно сделать сортировку перед сбросом на диск
 	@Override
 	public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 		return FileVisitResult.CONTINUE;
