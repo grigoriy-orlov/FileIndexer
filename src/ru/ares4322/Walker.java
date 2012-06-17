@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.AbstractQueue;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,21 +22,24 @@ public class Walker implements Runnable {
 	protected Charset charset;
 	protected Condition condition;
 	protected AbstractQueue<Path> pathQueue;
+	protected Lock lock;
 
-	public Walker(Path searchPath, Path tmpFile, Charset charset, Condition condition, AbstractQueue<Path> pathQueue) {
-		System.out.println("--> Create walker");
+	public Walker(Path searchPath, Path tmpFile, Charset charset, Condition condition, AbstractQueue<Path> pathQueue, Lock lock) {
+		System.out.println("Create walker for path: " + searchPath.toAbsolutePath()+", tmpFile: "+tmpFile.toAbsolutePath());
 		this.searchPath = searchPath;
 		this.tmpFile = tmpFile;
 		this.charset = charset;
 		this.pathQueue = pathQueue;
+		this.condition = condition;
+		this.lock = lock;
 	}
 
 	@Override
 	public void run() {
 		try {
-			PrintWriter writer = new PrintWriter(Files.newBufferedWriter(this.tmpFile, this.charset));
-			Files.walkFileTree(this.searchPath, new MyFileVisitor(writer, this.condition, this.pathQueue));
-			writer.close();
+			try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(this.tmpFile, this.charset))) {
+				Files.walkFileTree(this.searchPath, new MyFileVisitor(writer, this.condition, this.pathQueue, this.lock, this.searchPath));
+			}
 		} catch (IOException ex) {
 			Logger.getLogger(Walker.class.getName()).log(Level.SEVERE, null, ex);
 		}
