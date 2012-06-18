@@ -1,4 +1,4 @@
-package ru.ares4322;
+package ru.ares4322.args;
 
 /**
  *
@@ -7,7 +7,7 @@ package ru.ares4322;
 public enum ArgsParserEnum {
 
 	SIMPLE(1);
-	
+
 	public final int ID;
 
 	ArgsParserEnum(int id) {

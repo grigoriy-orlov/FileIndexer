@@ -8,24 +8,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.AbstractQueue;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * рабочий комп , /home/ares4322/Knowledge - 1 мин 24 сек
- * @author ares4322
+ * рабочий комп , /home/ares4322/Knowledge - менее секунды
+ * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class OIOMultithreadedInMemorySearcher implements Searcher {
+public class OIOMultithreadedInMemorySearcher2 implements Searcher {
 
 	@Override
 	public void search(String from) {
@@ -34,26 +33,26 @@ public class OIOMultithreadedInMemorySearcher implements Searcher {
 			int processorQuantity = Runtime.getRuntime().availableProcessors();
 			ExecutorService executor = Executors.newFixedThreadPool(processorQuantity);
 			AbstractQueue<File> pathQueue = new ConcurrentLinkedQueue<>();
-			AbstractQueue<String> resultQueue = new ConcurrentLinkedQueue<>();
-			Lock lock = new ReentrantLock();
-			Condition condition = lock.newCondition();
 
 			pathQueue.add(new File(from));
-			while (pathQueue.isEmpty() == false) {
-				File file = pathQueue.poll();
-				executor.execute(new DirVisitor(file, pathQueue, lock, condition, resultQueue));
-				lock.lock();
-				try {
-					condition.await();
-				} catch (InterruptedException ex) {
-					Logger.getLogger(OIOMultithreadedInMemorySearcher.class.getName()).log(Level.SEVERE, null, ex);
-				} finally {
-					lock.unlock();
-				}
+			List<Future<List<String>>> futures = new LinkedList<>();
+
+			int i = processorQuantity;
+			while ((i--) > 0) {
+				futures.add(executor.submit(new DirVisitor2(pathQueue)));
 			}
 			executor.shutdown();
 
-			List<String> resultStrings = new ArrayList<>(resultQueue);
+			List<String> resultStrings = new LinkedList<>();
+			for (Iterator<Future<List<String>>> it = futures.iterator(); it.hasNext();) {
+				Future<List<String>> future = it.next();
+				try {
+					resultStrings.addAll(future.get());
+				} catch (InterruptedException | ExecutionException ex) {
+					Logger.getLogger(OIOMultithreadedInMemorySearcher2.class.getName()).log(Level.SEVERE, null, ex);
+				}
+			}
+
 			Collections.sort(resultStrings);
 			Path resultFile = Files.createFile(Paths.get("/home/ares4322/tmp/result.txt"));
 			writer = new PrintWriter(Files.newBufferedWriter(resultFile, Charset.forName("UTF-8")));

@@ -18,6 +18,9 @@ public class SearcherFactory {
 			case OIO_MULTI_THREADED_INMEMORY:
 				result = new OIOMultithreadedInMemorySearcher();
 				break;
+			case OIO_MULTI_THREADED_INMEMORY2:
+				result = new OIOMultithreadedInMemorySearcher2();
+				break;
 			default:
 				throw new ClassNotFoundException("Создание Searcher неподдерживаемого типа");
 		}

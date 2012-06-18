@@ -15,7 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * хз сколько первый раз и 14 секунд после нескольких запусков для /home/ares4322/work
+ * домашний комп, /home/ares4322/work - хз сколько первый раз и 14 секунд после нескольких запусков
+ * рабочий комп , /home/ares4322/Knowledge - 1 сек
  * @author ares4322
  */
 public class OIOForkJoinInMemorySearcher implements Searcher {

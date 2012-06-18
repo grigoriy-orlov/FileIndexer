@@ -9,7 +9,7 @@ public class SearchParams {
 	public String[] searchPaths;
 	public String[] excludePaths;
 
-	SearchParams(String[] searchPaths, String[] excludePaths) {
+	public SearchParams(String[] searchPaths, String[] excludePaths) {
 		this.searchPaths = searchPaths;
 		this.excludePaths = excludePaths;
 	}

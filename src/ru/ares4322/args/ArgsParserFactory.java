@@ -1,4 +1,4 @@
-package ru.ares4322;
+package ru.ares4322.args;
 
 /**
  *
@@ -13,7 +13,7 @@ public class ArgsParserFactory {
 				result = new SimpleArgsParser();
 				break;
 			default:
-				throw new ClassNotFoundException("Создание парсера параметров неподдерживаемого типа");
+				throw new ClassNotFoundException("creating parser of unknown type");
 		}
 		return result;
 	}

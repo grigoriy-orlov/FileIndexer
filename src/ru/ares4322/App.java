@@ -1,19 +1,10 @@
 package ru.ares4322;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import ru.ares4322.args.ArgsParserEnum;
+import ru.ares4322.args.ArgsParserFactory;
+import ru.ares4322.args.ArgsParsingException;
 
 /**
  *
@@ -22,19 +13,23 @@ import java.util.concurrent.locks.ReentrantLock;
 public class App {
 
 	//@todo сделать обработку IOException и InterruptedException
-	public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
+	public static void main(String[] args) {
+		try {
+			int processorQuantity = Runtime.getRuntime().availableProcessors();
+			System.out.println("processorQuantity: " + processorQuantity);
 
-		int processorQuantity = Runtime.getRuntime().availableProcessors();
-		System.out.println("processorQuantity: " + processorQuantity);
+			//@todo можно сделать абстрактную фабрику для семейств классов
+			SearchParams searchParams = ArgsParserFactory.build(ArgsParserEnum.SIMPLE).parse(args);
 
-		//@todo можно сделать абстрактную фабрику для семейств классов
-		SearchParams searchParams = ArgsParserFactory.build(ArgsParserEnum.SIMPLE).parse(args);
+			(new ParamsProcessor()).sortArray(searchParams.searchPaths).sortArrayIfNotNull(searchParams.excludePaths).
+					removePathRedundancy(searchParams.searchPaths).removePathRedundancyIfNotNull(searchParams.excludePaths);
 
-		(new ParamsProcessor()).sortArray(searchParams.searchPaths).sortArrayIfNotNull(searchParams.excludePaths).
-				removePathRedundancy(searchParams.searchPaths).removePathRedundancyIfNotNull(searchParams.excludePaths);
+			Searcher searcher = SearcherFactory.build(SearcherEnum.OIO_MULTI_THREADED_INMEMORY2);
+			searcher.search(searchParams.searchPaths[0]);
 
-		Searcher searcher = SearcherFactory.build(SearcherEnum.OIO_FORKJOIN_INMEMORY);
-		searcher.search(searchParams.searchPaths[0]);
+		} catch (ClassNotFoundException | ArgsParsingException ex) {
+			System.out.println("Error: "+ex.getMessage());
+		}
 
 	}
 
@@ -47,21 +42,5 @@ public class App {
 		}
 		System.out.println("Memory after (Mb): " + Runtime.getRuntime().freeMemory() / 1024 / 1024);
 		System.exit(0);
-	}
-
-	/**
-	 * @todo подумать, как тут можно оптимизировать
-	 */
-	public static String[] removePathRedundancy(String[] searchPaths) {
-		//@todo доделать
-		/*
-		 * List<String> resultList = new ArrayList<>(searchPaths.length);
-		 *
-		 * for (int i = (searchPaths.length - 1), k = 0; i >= k; i--) { for (int j = (i - 1), l = 0; j >= l; j--) { if
-		 * (searchPaths[j].startsWith(searchPaths[i])) { returnPaths[j] = null; } } }
-		 *
-		 */
-
-		return searchPaths;
 	}
 }

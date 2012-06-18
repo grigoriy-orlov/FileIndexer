@@ -11,8 +11,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 2 мин 16 сек первый раз и 9 секунд после нескольких запусков для /home/ares4322/work
- *
+ * домашний комп, /home/ares4322/work - 2 мин 16 сек первый раз и 9 секунд после нескольких запусков
+ * рабочий комп, /home/ares4322/Knowledge - 1 сек
+ * рабочий комп, /home/ares4322 (654320 строк) - 5 минут 6 секунд
  * @author ares4322
  */
 public class NIOSingleThreadedMemorySearcher implements Searcher {
