@@ -10,14 +10,14 @@ import java.util.concurrent.Callable;
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-class DirVisitor2 implements Callable<List<String>> {
+class WaitFreeFileVisitor implements Callable<List<String>> {
 
 	private final AbstractQueue<File> pathQueue;
 	private final LinkedList<String> results;
 	private static byte classCounter=1;
 	private byte classNumber;
 
-	public DirVisitor2(AbstractQueue<File> pathQueue) {
+	public WaitFreeFileVisitor(AbstractQueue<File> pathQueue) {
 		this.pathQueue = pathQueue;
 		this.results = new LinkedList<>();
 		classNumber = classCounter;

@@ -1,7 +1,6 @@
 package ru.ares4322.args;
 
 import java.util.Arrays;
-import ru.ares4322.SearchParams;
 
 /**
  *
@@ -25,6 +24,6 @@ public class SimpleArgsParser implements ArgsParser {
 			searchPaths = Arrays.copyOfRange(args, 0, delimeterIndex - 1);
 			excludePaths = Arrays.copyOfRange(args, delimeterIndex + 1, (args.length - 1));
 		}
-		return new SearchParams(searchPaths, excludePaths);
+		return (new SimpleSearchParams()).setExcludePaths(excludePaths).setSearchPaths(searchPaths);
 	}
 }

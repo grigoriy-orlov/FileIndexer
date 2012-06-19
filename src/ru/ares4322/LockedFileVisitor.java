@@ -11,7 +11,7 @@ import java.util.concurrent.locks.Lock;
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class DirVisitor implements Runnable {
+public class LockedFileVisitor implements Runnable {
 
 	private final AbstractQueue<File> pathQueue;
 	private final Lock lock;
@@ -19,7 +19,7 @@ public class DirVisitor implements Runnable {
 	private final AbstractQueue<String> resultQueue;
 	private final File file;
 
-	public DirVisitor(File file, AbstractQueue<File> pathQueue, Lock lock, Condition condition, AbstractQueue<String> resultQueue) {
+	public LockedFileVisitor(File file, AbstractQueue<File> pathQueue, Lock lock, Condition condition, AbstractQueue<String> resultQueue) {
 		this.pathQueue = pathQueue;
 		this.lock = lock;
 		this.condition = condition;

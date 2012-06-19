@@ -6,20 +6,21 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 
 /**
  * @WARNING Если работать с массивами или методами get()/set() списков, то максимальный адресуемый индекс 2,147,483,647
- * Для обхода этого ограничения надо использовать add().
+ * Для обхода этого ограничения надо использовать add() и LinkedList (у ArrayList это медленно)
  *
+ * Название SimpleFileVisitor уже занято в библиотеке
  * @author ares4322
  */
-public class JustFileVisitor implements FileVisitor<Path> {
+public class PlainFileVisitor implements FileVisitor<Path> {
 
-	private String[] pathArray;
-	private int lastFreePathArrayIndex;
+	private List<String> pathList;
 
-	public JustFileVisitor(String[] pathArray) {		
-		this.pathArray = pathArray;
+	public PlainFileVisitor(List<String> pathList) {		
+		this.pathList = pathList;
 	}
 
 	@Override
@@ -56,7 +57,6 @@ public class JustFileVisitor implements FileVisitor<Path> {
 	}
 
 	private void addPath(Path path) {
-		this.pathArray[this.lastFreePathArrayIndex] = path.toAbsolutePath().toString();
-		this.lastFreePathArrayIndex++;
+		this.pathList.add(path.toAbsolutePath().toString());
 	}
 }
