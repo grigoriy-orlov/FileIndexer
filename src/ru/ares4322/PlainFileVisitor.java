@@ -6,32 +6,60 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * @WARNING Если работать с массивами или методами get()/set() списков, то максимальный адресуемый индекс 2,147,483,647
- * Для обхода этого ограничения надо использовать add() и LinkedList (у ArrayList это медленно)
+ * @WARNING Если работать с массивами или методами get()/set() списков, то
+ * максимальный адресуемый индекс 2,147,483,647 Для обхода этого ограничения
+ * надо использовать add() и LinkedList (у ArrayList это медленно)
  *
  * Название SimpleFileVisitor уже занято в библиотеке
+ *
  * @author ares4322
  */
 public class PlainFileVisitor implements FileVisitor<Path> {
 
-	private List<String> pathList;
+	protected List<String> searchPathList;
+	protected List<String> excludePathList;
 
-	public PlainFileVisitor(List<String> pathList) {		
-		this.pathList = pathList;
+	public PlainFileVisitor(List<String> searchPathList, List<String> excludePathList) {
+		this.searchPathList = searchPathList;
+		this.excludePathList = excludePathList;
 	}
 
+	//@todo здесь можно заменить перебор на двоичный поиск с подбором
 	@Override
 	public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-		this.addPath(dir);
-		return FileVisitResult.CONTINUE;
+		FileVisitResult result = FileVisitResult.CONTINUE;
+		boolean addPath = true;
+		for (Iterator<String> it = excludePathList.iterator(); it.hasNext();) {
+			String excludePath = it.next();
+			if (dir.startsWith(excludePath) || dir.toAbsolutePath().toString().equals(excludePath)) {
+				result = FileVisitResult.SKIP_SUBTREE;
+				addPath = false;
+				break;
+			}
+		}
+		if (addPath == true) {
+			this.addPath(dir);
+		}
+		return result;
 	}
 
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-		this.addPath(file);
+		boolean addPath = true;
+		for (Iterator<String> it = excludePathList.iterator(); it.hasNext();) {
+			String excludePath = it.next();
+			if (file.toAbsolutePath().toString().equals(excludePath)) {
+				addPath = false;
+				break;
+			}
+		}
+		if (addPath == true) {
+			this.addPath(file);
+		}
 		return FileVisitResult.CONTINUE;
 	}
 
@@ -57,6 +85,6 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 	}
 
 	private void addPath(Path path) {
-		this.pathList.add(path.toAbsolutePath().toString());
+		this.searchPathList.add(path.toAbsolutePath().toString());
 	}
 }

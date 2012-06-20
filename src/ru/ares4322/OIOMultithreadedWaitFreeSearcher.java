@@ -3,10 +3,6 @@ package ru.ares4322;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
@@ -51,11 +47,8 @@ public class OIOMultithreadedWaitFreeSearcher implements Searcher {
 			executor.shutdown();
 
 			Collections.sort(resultPathList);
-			Path resultFile = Files.createFile(Paths.get("/home/ares4322/tmp/result.txt"));
-			writer = new PrintWriter(Files.newBufferedWriter(resultFile, Charset.forName("UTF-8")));
-			for (Iterator<String> it = resultPathList.iterator(); it.hasNext();) {
-				writer.println(it.next());
-			}
+
+			Utils.writePathListToFile("/home/ares4322/tmp/result.txt", resultPathList, "UTF-8");
 		} catch (InterruptedException | ExecutionException ex) {
 			Logger.getLogger(OIOMultithreadedWaitFreeSearcher.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {
