@@ -3,11 +3,11 @@ package ru.ares4322;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ru.ares4322.args.SearchParams;
@@ -28,20 +28,20 @@ public class NIOSingleThreadedSearcher implements Searcher {
 
 		PrintWriter writer = null;
 		try {
-			List<String> resultPathList = new LinkedList<>();
+			List<Path> resultPathList = new LinkedList<>();
 
-			String[] searchPaths = searchParams.getSearchPaths();
-			List<String> excludePaths = Arrays.asList(searchParams.getExcludePaths());
-			for (int i = 0, l = searchPaths.length; i < l; i++) {
-				String searchPath = searchPaths[i];
-				List<String> oneParamPathList = new LinkedList<>();
-				Files.walkFileTree(Paths.get(searchPath), new PlainFileVisitor(oneParamPathList, excludePaths));
-				resultPathList.addAll(oneParamPathList);
+			Map<Path, List<Path>> sortedPathMap = searchParams.getSortedPathMap();
+			for (Map.Entry<Path, List<Path>> entry : sortedPathMap.entrySet()) {
+				Path searchPath = entry.getKey();
+				List<Path> excludePathList = entry.getValue();
+				List<Path> oneParamPathResultList = new LinkedList<>();
+				Files.walkFileTree(searchPath, new PlainFileVisitor(oneParamPathResultList, excludePathList));
+				resultPathList.addAll(oneParamPathResultList);
 			}
 
 			Collections.sort(resultPathList);
 
-			Utils.writePathListToFile("/home/ares4322/tmp/result.txt", resultPathList, "UTF-8");
+			Utils.writePathListToFileExt("/home/ares4322/tmp/result.txt", resultPathList, "UTF-8");
 
 		} catch (IOException ex) {
 			Logger.getLogger(NIOSingleThreadedSearcher.class.getName()).log(Level.SEVERE, null, ex);

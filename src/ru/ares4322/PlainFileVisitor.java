@@ -20,10 +20,10 @@ import java.util.List;
  */
 public class PlainFileVisitor implements FileVisitor<Path> {
 
-	protected List<String> searchPathList;
-	protected List<String> excludePathList;
+	protected List<Path> searchPathList;
+	protected List<Path> excludePathList;
 
-	public PlainFileVisitor(List<String> searchPathList, List<String> excludePathList) {
+	public PlainFileVisitor(List<Path> searchPathList, List<Path> excludePathList) {
 		this.searchPathList = searchPathList;
 		this.excludePathList = excludePathList;
 	}
@@ -33,9 +33,9 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 	public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 		FileVisitResult result = FileVisitResult.CONTINUE;
 		boolean addPath = true;
-		for (Iterator<String> it = excludePathList.iterator(); it.hasNext();) {
-			String excludePath = it.next();
-			if (dir.startsWith(excludePath) || dir.toAbsolutePath().toString().equals(excludePath)) {
+		for (Iterator<Path> it = this.excludePathList.iterator(); it.hasNext();) {
+			Path excludePath = it.next();
+			if (dir.startsWith(excludePath) || dir.equals(excludePath)) {
 				result = FileVisitResult.SKIP_SUBTREE;
 				addPath = false;
 				break;
@@ -49,17 +49,12 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-		boolean addPath = true;
-		for (Iterator<String> it = excludePathList.iterator(); it.hasNext();) {
-			String excludePath = it.next();
-			if (file.toAbsolutePath().toString().equals(excludePath)) {
-				addPath = false;
-				break;
-			}
-		}
+		boolean addPath = Utils.searchPathInList(file, this.excludePathList);
+
 		if (addPath == true) {
 			this.addPath(file);
 		}
+		
 		return FileVisitResult.CONTINUE;
 	}
 
@@ -85,6 +80,6 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 	}
 
 	private void addPath(Path path) {
-		this.searchPathList.add(path.toAbsolutePath().toString());
+		this.searchPathList.add(path.toAbsolutePath());
 	}
 }

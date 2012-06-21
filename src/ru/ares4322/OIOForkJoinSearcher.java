@@ -1,12 +1,8 @@
 package ru.ares4322;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
@@ -28,21 +24,21 @@ public class OIOForkJoinSearcher implements Searcher {
 
 		PrintWriter writer = null;
 		try {
-			List<String> resultPathList = new LinkedList<>();
-			String[] searchPaths = searchParams.getSearchPaths();
+			List<Path> resultPathList = new LinkedList<>();
 
 			final int availableProcessors = Runtime.getRuntime().availableProcessors();
 			ForkJoinPool forkJoinPool = new ForkJoinPool(availableProcessors);
-			List<String> excludePaths = Arrays.asList(searchParams.getExcludePaths());
-			for (int i = 0, l = searchPaths.length; i < l; i++) {
-				String searchPath = searchPaths[i];
-				RecursiveFileVisitor dirVisitorTask = new RecursiveFileVisitor(new File(searchPath), excludePaths);
-				List<String> oneParamPathList = forkJoinPool.invoke(dirVisitorTask);
+			Map<Path, List<Path>> sortedPathMap = searchParams.getSortedPathMap();
+			for (Map.Entry<Path, List<Path>> entry : sortedPathMap.entrySet()) {
+				Path searchPath = entry.getKey();
+				List<Path> excludePathList = entry.getValue();
+				RecursiveFileVisitor dirVisitorTask = new RecursiveFileVisitor(searchPath, excludePathList);
+				List<Path> oneParamPathList = forkJoinPool.invoke(dirVisitorTask);
 				resultPathList.addAll(oneParamPathList);
 			}
 			Collections.sort(resultPathList);
 
-			Utils.writePathListToFile("/home/ares4322/tmp/result.txt", resultPathList, "UTF-8");
+			Utils.writePathListToFileExt("/home/ares4322/tmp/result.txt", resultPathList, "UTF-8");
 		} catch (IOException ex) {
 			Logger.getLogger(OIOForkJoinSearcher.class.getName()).log(Level.SEVERE, null, ex);
 		} finally {

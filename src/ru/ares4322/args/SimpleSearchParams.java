@@ -1,19 +1,33 @@
 package ru.ares4322.args;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+
 /**
  *
  * @author ares4322
  */
 public class SimpleSearchParams extends SearchParams {
 
-	protected String[] excludePaths;
+	protected List<Path> excludePathList;
 
-	public String[] getExcludePaths() {
-		return excludePaths;
+	protected Map<Path, List<Path>> sortedPathMap;
+
+	public List<Path> getExcludePathList() {
+		return excludePathList;
 	}
 
-	public SimpleSearchParams setExcludePaths(String[] excludePaths) {
-		this.excludePaths = excludePaths;
+	public SimpleSearchParams setExcludePathList(List<Path> excludePathList) {
+		this.excludePathList = excludePathList;
 		return this;
+	}
+
+	public Map<Path, List<Path>> getSortedPathMap() {
+		return sortedPathMap;
+	}
+
+	public void setSortedPathMap(Map<Path, List<Path>> sortedPathMap) {
+		this.sortedPathMap = sortedPathMap;
 	}
 }

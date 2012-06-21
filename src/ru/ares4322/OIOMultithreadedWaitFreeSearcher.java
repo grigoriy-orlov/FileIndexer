@@ -3,6 +3,7 @@ package ru.ares4322;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
@@ -25,30 +26,31 @@ public class OIOMultithreadedWaitFreeSearcher implements Searcher {
 		try {
 			final int processorQuantity = Runtime.getRuntime().availableProcessors();
 			ExecutorService executor = Executors.newFixedThreadPool(processorQuantity);
-			AbstractQueue<File> pathQueue = new ConcurrentLinkedQueue<>();
+			AbstractQueue<Path> pathQueue = new ConcurrentLinkedQueue<>();
 
-			List<String> resultPathList = new LinkedList<>();
+			List<Path> resultPathList = new LinkedList<>();
 
-			String[] searchPaths = searchParams.getSearchPaths();
-			for (int i = 0, l = searchPaths.length; i < l; i++) {
-				String searchPath = searchPaths[i];
-				pathQueue.add(new File(searchPath));
-				List<Future<List<String>>> futures = new LinkedList<>();
-
+			Map<Path, List<Path>> sortedPathMap = searchParams.getSortedPathMap();
+			for (Map.Entry<Path, List<Path>> entry : sortedPathMap.entrySet()) {
+				Path searchPath = entry.getKey();
+				List<Path> excludePathList = entry.getValue();
+				pathQueue.add(searchPath);
+				List<Future<List<Path>>> futures = new LinkedList<>();
 				int processors = processorQuantity;
 				while ((processors--) > 0) {
-					futures.add(executor.submit(new WaitFreeFileVisitor(pathQueue)));
+					futures.add(executor.submit(new WaitFreeFileVisitor(pathQueue, excludePathList)));
 				}
-				for (Iterator<Future<List<String>>> it = futures.iterator(); it.hasNext();) {
-					Future<List<String>> future = it.next();
-					resultPathList.addAll(future.get());
+				for (Iterator<Future<List<Path>>> it = futures.iterator(); it.hasNext();) {
+					Future<List<Path>> future = it.next();
+					if(future != null)
+						resultPathList.addAll(future.get());
 				}
 			}
 			executor.shutdown();
 
 			Collections.sort(resultPathList);
 
-			Utils.writePathListToFile("/home/ares4322/tmp/result.txt", resultPathList, "UTF-8");
+			Utils.writePathListToFileExt("/home/ares4322/tmp/result.txt", resultPathList, "UTF-8");
 		} catch (InterruptedException | ExecutionException ex) {
 			Logger.getLogger(OIOMultithreadedWaitFreeSearcher.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (IOException ex) {

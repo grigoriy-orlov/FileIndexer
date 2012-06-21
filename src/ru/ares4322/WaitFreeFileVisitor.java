@@ -1,52 +1,71 @@
 package ru.ares4322;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.AbstractQueue;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-class WaitFreeFileVisitor implements Callable<List<String>> {
+class WaitFreeFileVisitor implements Callable<List<Path>> {
 
-	private final AbstractQueue<File> pathQueue;
-	private final LinkedList<String> results;
-	private static byte classCounter=1;
+	private AbstractQueue<Path> pathQueue;
+	private LinkedList<Path> resultList;
+	private static byte classCounter = 1;
 	private byte classNumber;
+	private List<Path> excludePathList;
 
-	public WaitFreeFileVisitor(AbstractQueue<File> pathQueue) {
+	public WaitFreeFileVisitor(AbstractQueue<Path> pathQueue, List<Path> excludePathList) {
 		this.pathQueue = pathQueue;
-		this.results = new LinkedList<>();
+		this.resultList = new LinkedList<>();
+		this.excludePathList = excludePathList;
 		classNumber = classCounter;
 		classCounter++;
-		//System.out.println("start: "+classNumber);
+		System.out.println("start: " + classNumber);
 	}
 
 	@Override
-	public List<String> call() throws Exception {
+	public List<Path> call() throws Exception {
 
 		while (this.pathQueue.isEmpty() == false) {
-			File file = this.pathQueue.poll();
+			System.out.println("process: " + classNumber);
+			Path path = this.pathQueue.poll();
 
-			this.results.add(file.getAbsolutePath());
+			boolean addPath = Utils.searchPathInList(path, this.excludePathList);
 
-			if (file.isDirectory()) {
-				File[] files = file.listFiles();
-				if (files != null) {
-					for (int i = 0, l = files.length; i < l; i++) {
-						File childFile = files[i];
-						if (childFile.isDirectory()) {
-							this.pathQueue.add(childFile);
-						} else if (childFile.isFile()) {
-							this.results.add(childFile.getAbsolutePath());
+			if (addPath) {
+				this.resultList.add(path.toAbsolutePath());
+
+				if (Files.isDirectory(path)) {
+					try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
+						for (Iterator<Path> it = directoryStream.iterator(); it.hasNext();) {
+							Path pathInDirectory = it.next();
+							if (Files.isDirectory(pathInDirectory)) {
+								this.pathQueue.add(pathInDirectory);
+							} else if (Files.isRegularFile(pathInDirectory)) {
+								this.resultList.add(pathInDirectory.toAbsolutePath());
+							}
+							//@todo сюда тоже нужна обработка исключения? (когда файл в этой директории не открывается)
 						}
+					} catch (DirectoryIteratorException ex) {
+						System.out.println("Fail visit file: " + ex.getCause().getMessage());
+					} catch (IOException ex) {
+						Logger.getLogger(RecursiveFileVisitor.class.getName()).log(Level.SEVERE, null, ex);
 					}
 				}
 			}
 		}
-		return this.results;
+		return this.resultList;
 	}
 }

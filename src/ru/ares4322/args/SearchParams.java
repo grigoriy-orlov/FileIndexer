@@ -1,19 +1,23 @@
 package ru.ares4322.args;
 
+import java.nio.file.Path;
+import java.util.List;
+
 /**
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
 public class SearchParams {
 
-	protected String[] searchPaths;
+	protected List<Path> searchPathList;
 
-	public String[] getSearchPaths() {
-		return searchPaths;
+	public List<Path> getSearchPathList() {
+
+		return searchPathList;
 	}
 
-	public SearchParams setSearchPaths(String[] searchPaths) {
-		this.searchPaths = searchPaths;
+	public SearchParams setSearchPathList(List<Path> searchPathList) {
+		this.searchPathList = searchPathList;
 		return this;
 	}
 }
