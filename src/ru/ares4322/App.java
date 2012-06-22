@@ -2,7 +2,9 @@
  *************
  * TODO list *
  *************
- * -1) Переделать WaitFree и Locked алгоритмы, так как они не работают
+ * -2) ВАЖНО!!! Протестировать с 1000000 файлов по памяти 0 влезет или нет в Гиг-полтора и сколько будет работать. Если нет, то придется думать с внешней сортировкой
+ *
+ * -1) Переделать WaitFree и Locked алгоритмы, так как они не работают (может Locked вообще убрать)
  *
  * 0) Если введен несуществующий путь, то он просто выводится в файл, как есть, что не правильно.
  *
@@ -58,7 +60,7 @@ public class App {
 			SearchParams searchParams = paramsParser.parse(args);
 			searchParams = paramsProcessor.process(searchParams);
 
-			Searcher searcher = SearcherFactory.build(SearcherEnum.OIO_MULTI_THREADED_WAIT_FREE);
+			Searcher searcher = SearcherFactory.build(SearcherEnum.OIO_FORK_JOIN);
 			searcher.search(searchParams);
 
 		} catch (ClassNotFoundException | ArgsParsingException ex) {

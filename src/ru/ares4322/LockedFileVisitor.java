@@ -1,8 +1,6 @@
 package ru.ares4322;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,8 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -41,28 +37,11 @@ public class LockedFileVisitor implements Runnable {
 	public void run() {
 		List<Path> dirs = new LinkedList<>();
 
-		boolean addPath = Utils.searchPathInList(path, this.excludePathList);
+		resultQueue.add(this.path.toAbsolutePath());
 
-		if (addPath) {
-			resultQueue.add(this.path.toAbsolutePath());
+		if (Files.isDirectory(this.path)) {
+			this.processPath(this.path, dirs, this.resultQueue);
 
-			if (Files.isDirectory(this.path)) {
-				try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
-					for (Iterator<Path> it = directoryStream.iterator(); it.hasNext();) {
-						Path pathInDirectory = it.next();
-						if (Files.isDirectory(pathInDirectory)) {
-							dirs.add(pathInDirectory);
-						} else if (Files.isRegularFile(pathInDirectory)) {
-							this.resultQueue.add(pathInDirectory.toAbsolutePath());
-						}
-						//@todo сюда тоже нужна обработка исключения? (когда файл в этой директории не открывается)
-					}
-				} catch (DirectoryIteratorException ex) {
-					System.out.println("Fail visit file: " + ex.getCause().getMessage());
-				} catch (IOException ex) {
-					Logger.getLogger(RecursiveFileVisitor.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
 			if (dirs.isEmpty() == false) {
 				pathQueue.addAll(dirs);
 			}
@@ -72,6 +51,24 @@ public class LockedFileVisitor implements Runnable {
 			} finally {
 				this.lock.unlock();
 			}
+		}
+	}
+
+	private void processPath(Path path, List<Path> dirs, AbstractQueue<Path> resultQueue) {
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
+			for (Iterator<Path> it = directoryStream.iterator(); it.hasNext();) {
+				Path pathInDirectory = it.next();
+				boolean addPath = Utils.searchPathInList(pathInDirectory, this.excludePathList);
+				if (addPath) {
+					if (Files.isDirectory(pathInDirectory)) {
+						dirs.add(pathInDirectory);
+					} else if (Files.isRegularFile(pathInDirectory)) {
+						resultQueue.add(pathInDirectory.toAbsolutePath());
+					}
+				}
+			}
+		}catch (IOException ex) {
+			System.out.println("Fail visit file: "+ex.getMessage());
 		}
 	}
 }

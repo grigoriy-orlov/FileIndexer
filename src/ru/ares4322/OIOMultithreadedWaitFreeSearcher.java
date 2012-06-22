@@ -1,6 +1,5 @@
 package ru.ares4322;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
@@ -13,7 +12,7 @@ import ru.ares4322.args.SimpleSearchParams;
 
 /**
  * рабочий комп , /home/ares4322/Knowledge - менее секунды
- *
+ * рабочий комп , /home/ares4322/work - с выводом в консоль - 300000 файлов, 500 Мб и 10 минут
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
 public class OIOMultithreadedWaitFreeSearcher implements Searcher {
