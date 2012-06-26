@@ -1,5 +1,6 @@
 package ru.ares4322.args;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -15,7 +16,7 @@ public class SimpleArgsParser implements ArgsParser {
 	@Override
 	public SearchParams parse(String[] args) throws ArgsParsingException {
 		if (args == null || args.length == 0) {
-			throw new ArgsParsingException("ERROR: you must specify at least one argument");
+			throw new ArgsParsingException("you must specify at least one argument");
 		}
 		int delimeterIndex = Arrays.binarySearch(args, "-");
 		String[] searchPaths;
@@ -26,7 +27,7 @@ public class SimpleArgsParser implements ArgsParser {
 			searchPathList = this.pathArrayToList(args);
 			excludePathList = this.pathArrayToList(excludePaths);
 		} else if (delimeterIndex == 0 || delimeterIndex == (args.length - 1)) {
-			throw new ArgsParsingException("wrong args format. must be searchPath1 [searchPathsN] [-] [excludePath1] [[excludePathN]");
+			throw new ArgsParsingException("wrong args format. must be searchPath1 ... [searchPathsN] [-] [excludePath1] ... [excludePathN]");
 		} else {
 			searchPaths = Arrays.copyOfRange(args, 0, delimeterIndex);
 			excludePaths = Arrays.copyOfRange(args, delimeterIndex + 1, args.length);
@@ -41,8 +42,17 @@ public class SimpleArgsParser implements ArgsParser {
 
 		if (pathArray != null) {
 			for (int i = 0, l = pathArray.length; i < l; i++) {
-				String searchPath = pathArray[i];
-				pathList.add(Paths.get(searchPath));
+				String searchPathName = pathArray[i];
+				Path searchPath = Paths.get(searchPathName).toAbsolutePath().normalize();
+				if (Files.exists(searchPath)) {
+					if (Files.isSymbolicLink(searchPath) == false) {
+						pathList.add(searchPath);
+					} else {
+						System.err.println("symbolic link (not processed): " + searchPathName);
+					}
+				} else {
+					System.err.println("not exists: " + searchPathName);
+				}
 			}
 		}
 

@@ -54,7 +54,7 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 		if (addPath == true) {
 			this.addPath(file);
 		}
-		
+
 		return FileVisitResult.CONTINUE;
 	}
 
@@ -70,7 +70,7 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 		} else {
 			preffix = "Fail visit unknown filesystem entity: ";
 		}
-		System.out.println((new StringBuilder(2)).append(preffix).append(file.toAbsolutePath()));
+		System.err.println((new StringBuilder(2)).append(preffix).append(file.toAbsolutePath()));
 		return FileVisitResult.CONTINUE;
 	}
 

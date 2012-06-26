@@ -1,5 +1,6 @@
 package ru.ares4322.args;
 
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -10,6 +11,8 @@ import java.util.List;
 public class SearchParams {
 
 	protected List<Path> searchPathList;
+	protected Path outputFilePath;
+	protected Charset outputFileCharset;
 
 	public List<Path> getSearchPathList() {
 
@@ -19,5 +22,21 @@ public class SearchParams {
 	public SearchParams setSearchPathList(List<Path> searchPathList) {
 		this.searchPathList = searchPathList;
 		return this;
+	}
+
+	public Path getOutputFilePath() {
+		return outputFilePath;
+	}
+
+	public void setOutputFilePath(Path outputFilePath) {
+		this.outputFilePath = outputFilePath;
+	}
+
+	public Charset getOutputFileCharset() {
+		return outputFileCharset;
+	}
+
+	public void setOutputFileCharset(Charset outputFileCharset) {
+		this.outputFileCharset = outputFileCharset;
 	}
 }

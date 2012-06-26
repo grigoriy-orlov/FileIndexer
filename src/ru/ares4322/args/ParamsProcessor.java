@@ -6,5 +6,5 @@ package ru.ares4322.args;
  */
 public interface ParamsProcessor {
 
-	SearchParams process(SearchParams params);
+	SearchParams process(SearchParams params) throws ParamsProcessingException;
 }
