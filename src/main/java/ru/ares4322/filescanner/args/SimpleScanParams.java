@@ -3,6 +3,7 @@ package ru.ares4322.filescanner.args;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * Параметры сканирования
@@ -12,7 +13,8 @@ import java.util.Map;
 public class SimpleScanParams extends ScanParams {
 
 	protected List<Path> excludePathList;
-	protected Map<Path, List<Path>> excludePathsToScanPathMap;
+	protected SortedMap<Path, List<Path>> excludePathsToScanPathMap;
+	protected Map<String, SortedMap<Path, List<Path>>> diskToExcludePathsToScanPathMap;
 
 	public List<Path> getExcludePathList() {
 		return excludePathList;
@@ -23,11 +25,19 @@ public class SimpleScanParams extends ScanParams {
 		return this;
 	}
 
-	public Map<Path, List<Path>> getExcludePathsToScanPathMap() {
+	public SortedMap<Path, List<Path>> getExcludePathsToScanPathMap() {
 		return excludePathsToScanPathMap;
 	}
 
-	public void setExcludePathsToScanPathMap(Map<Path, List<Path>> excludePathsToScanPathMap) {
+	public void setExcludePathsToScanPathMap(SortedMap<Path, List<Path>> excludePathsToScanPathMap) {
 		this.excludePathsToScanPathMap = excludePathsToScanPathMap;
+	}
+
+	public Map<String, SortedMap<Path, List<Path>>> getDiskToExcludePathsToScanPathMap() {
+		return diskToExcludePathsToScanPathMap;
+	}
+
+	public void setDiskToExcludePathsToScanPathMap(Map<String, SortedMap<Path, List<Path>>> diskToExcludePathsToScanPathMap) {
+		this.diskToExcludePathsToScanPathMap = diskToExcludePathsToScanPathMap;
 	}
 }

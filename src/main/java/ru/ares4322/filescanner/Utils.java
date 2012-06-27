@@ -54,8 +54,43 @@ public class Utils {
 	}
 
 	/**
-	 * @todo разобраться, почему неправльно работает
-	 * Ищет путь в отсортированном списке путей
+	 * Пишет в файл пути из списка в соответствии с шаблоном из ТЗ
+	 *
+	 * @param resultFilePath Путь файла, в который необходимо писать
+	 * @param pathList Список путей для записи
+	 * @param charset Кодировка итогового файла
+	 */
+	public static void writePathListToFileExt(Path resultFilePath, List<FileInfo> fileInfoList, Charset charset) {
+		PrintWriter writer = null;
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd");
+		try {
+			Files.deleteIfExists(resultFilePath);
+			Path resultFile = Files.createFile(resultFilePath);
+			writer = new PrintWriter(Files.newBufferedWriter(resultFile, charset));
+			for (Iterator<FileInfo> it = fileInfoList.iterator(); it.hasNext();) {
+				StringBuilder stringBuilder = new StringBuilder();
+				FileInfo fileInfo = it.next();
+				stringBuilder.append("[file = ");
+				stringBuilder.append(fileInfo.absPath);
+				stringBuilder.append("\ndate = ");
+				stringBuilder.append(formatter.format(fileInfo.lastModTime));
+				stringBuilder.append("\nsize = ");
+				stringBuilder.append(fileInfo.size);
+				stringBuilder.append("]");
+				writer.println(stringBuilder);
+			}
+		} catch (IOException ex) {
+			System.err.println("ERROR: " + ex.getMessage());
+		} finally {
+			if (writer != null) {
+				writer.close();
+			}
+		}
+	}
+
+	/**
+	 * @todo разобраться, почему неправльно работает Ищет путь в отсортированном
+	 * списке путей
 	 *
 	 * @param path Путь, который ищем
 	 * @param sortedPathList Отсортированный список путей, в котором ищем

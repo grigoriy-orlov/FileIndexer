@@ -6,8 +6,11 @@ import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Название SimpleFileVisitor уже занято в библиотеке
@@ -16,11 +19,11 @@ import java.util.List;
  */
 public class PlainFileVisitor implements FileVisitor<Path> {
 
-	protected List<Path> searchPathList;
+	protected List<FileInfo> scanPathList;
 	protected List<Path> excludePathList;
 
-	public PlainFileVisitor(List<Path> searchPathList, List<Path> excludePathList) {
-		this.searchPathList = searchPathList;
+	public PlainFileVisitor(List<FileInfo> scanPathList, List<Path> excludePathList) {
+		this.scanPathList = scanPathList;
 		this.excludePathList = excludePathList;
 	}
 
@@ -30,7 +33,7 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 		FileVisitResult result = FileVisitResult.CONTINUE;
 		boolean addPath = true;
 
-		//@todo прикрутить тут Utils.searchPathInList и можно сделать удаление найденного пути из списка исключений
+		//@todo прикрутить тут Utils.scanPathInList и можно сделать удаление найденного пути из списка исключений
 		for (Iterator<Path> it = this.excludePathList.iterator(); it.hasNext();) {
 			Path excludePath = it.next();
 			if (dir.startsWith(excludePath) || dir.equals(excludePath)) {
@@ -78,6 +81,10 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 	}
 
 	private void addPath(Path path) {
-		this.searchPathList.add(path.toAbsolutePath());
+		try {
+			this.scanPathList.add(new FileInfo(path, path.toAbsolutePath().toString(), Files.size(path), new Date(Files.getLastModifiedTime(path).toMillis())));
+		} catch (IOException ex) {
+			System.err.println("Fail save file info for "+path+", cause: "+ex);
+		}
 	}
 }

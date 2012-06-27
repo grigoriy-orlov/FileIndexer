@@ -1,13 +1,19 @@
 package ru.ares4322.filescanner.args;
 
+import java.io.IOException;
+import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Обработчик параметров сканирования
@@ -50,8 +56,9 @@ public class SimpleParamsProcessor implements ParamsProcessor {
 		this.removePathRedunduncy(scanParams.scanPathList);
 		this.removePathRedunduncy(scanParams.excludePathList);
 
-		scanParams.setExcludePathsToScanPathMap(this.sortExcludePathsToSearchPaths(scanParams.scanPathList, scanParams.excludePathList));
+		scanParams.setExcludePathsToScanPathMap(this.sortExcludePathsToSearchPath(scanParams.scanPathList, scanParams.excludePathList));
 
+		scanParams.setDiskToExcludePathsToScanPathMap(this.sortPathMapsToDisk(scanParams.getExcludePathsToScanPathMap()));
 		return scanParams;
 	}
 
@@ -124,7 +131,7 @@ public class SimpleParamsProcessor implements ParamsProcessor {
 	 * @return Словарь, в котором ключи - пути сканирования, а значения - списки
 	 * путей исключения
 	 */
-	protected SortedMap<Path, List<Path>> sortExcludePathsToSearchPaths(List<Path> scanPathList, List<Path> excludePathList) {
+	protected SortedMap<Path, List<Path>> sortExcludePathsToSearchPath(List<Path> scanPathList, List<Path> excludePathList) {
 		SortedMap<Path, List<Path>> resultMap = new TreeMap<>();
 		boolean put;
 
@@ -149,5 +156,29 @@ public class SimpleParamsProcessor implements ParamsProcessor {
 		}
 
 		return resultMap;
+	}
+
+	protected Map<String, SortedMap<Path, List<Path>>> sortPathMapsToDisk(SortedMap<Path, List<Path>> sortedPathMap) {
+		Map<String, SortedMap<Path, List<Path>>> pathMapsByDisks = new HashMap<>(sortedPathMap.size());
+
+		for (SortedMap.Entry<Path, List<Path>> entry : sortedPathMap.entrySet()) {
+			Path scanPath = entry.getKey();
+			List<Path> excludePathList = entry.getValue();
+			String diskName = "";
+			try {
+				diskName = Files.getFileStore(scanPath).name();
+			} catch (IOException ex) {
+				System.err.println(new StringBuilder(4).append("can't get filestore of ").append(scanPath).append(", error: ").append(ex.getMessage()));
+			}
+
+			SortedMap<Path, List<Path>> pathMapForDisk = pathMapsByDisks.get(diskName);
+			if (pathMapForDisk == null) {
+				pathMapForDisk = new TreeMap<>();
+				pathMapsByDisks.put(diskName, pathMapForDisk);
+			}
+			pathMapForDisk.put(scanPath, excludePathList);
+
+		}
+		return pathMapsByDisks;
 	}
 }

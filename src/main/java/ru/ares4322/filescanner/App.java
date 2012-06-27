@@ -56,27 +56,27 @@ public class App {
 			String outputFileCharsetName = "UTF-8";
 			String outputFilePathName = "/home/ares4322/tmp/result.txt";
 
-			SimpleScanParamsFactory searchParamsFactory = new SimpleScanParamsFactory();
+			SimpleScanParamsFactory scanParamsFactory = new SimpleScanParamsFactory();
 
-			ArgsParser paramsParser = searchParamsFactory.buildArgsParser();
-			ParamsProcessor paramsProcessor = searchParamsFactory.buildParamsProcessor();
+			ArgsParser paramsParser = scanParamsFactory.buildArgsParser();
+			ParamsProcessor paramsProcessor = scanParamsFactory.buildParamsProcessor();
 
-			ScanParams searchParams = paramsParser.parse(args);
-			searchParams = paramsProcessor.process(searchParams);
-			searchParams.setOutputFileCharset(Charset.forName(outputFileCharsetName));
-			searchParams.setOutputFilePath(Paths.get(outputFilePathName));
+			ScanParams scanParams = paramsParser.parse(args);
+			scanParams = paramsProcessor.process(scanParams);
+			scanParams.setOutputFileCharset(Charset.forName(outputFileCharsetName));
+			scanParams.setOutputFilePath(Paths.get(outputFilePathName));
 
 			ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 			scheduledExecutor.scheduleWithFixedDelay(new ProgressBarTask(), 0, 1, TimeUnit.SECONDS);
 
-			FileScanner searcher = FileScannerFactory.build(FileScannerEnum.NIO);
-			searcher.scan(searchParams);
+			FileScanner scaner = FileScannerFactory.build(FileScannerEnum.NIO);
+			scaner.scan(scanParams);
 
 			scheduledExecutor.shutdown();
 
 		} catch (ClassNotFoundException | ParamsProcessingException | ArgsParsingException ex) {
 			System.out.println("Error: " + ex.getMessage());
 		}
-
+		System.out.println("last line of program");
 	}
 }

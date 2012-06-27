@@ -10,20 +10,25 @@ import java.util.concurrent.Callable;
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class PlainFileVisitorTask implements Callable<List<Path>> {
+public class PlainFileVisitorTask implements Callable<ScanResult> {
 
 	protected List<Path> excludePathList;
-	private final Path searchPath;
+	protected Path scanPath;
+	protected String diskName;
 
-	public PlainFileVisitorTask(Path searchPath, List<Path> excludePathList) {
-		this.searchPath = searchPath;
+	public PlainFileVisitorTask(Path scanPath, List<Path> excludePathList, String diskName) {
+		this.scanPath = scanPath;
 		this.excludePathList = excludePathList;
+		this.diskName = diskName;
+		System.out.println(new StringBuilder().append("create task, scan path: ").append(scanPath).append(", disk name: ").append(diskName));
 	}
 
 	@Override
-	public List<Path> call() throws Exception {
-		List<Path> searchPathList = new LinkedList<>();
-		Files.walkFileTree(searchPath, new PlainFileVisitor(searchPathList, excludePathList));
-		return searchPathList;
+	public ScanResult call() throws Exception {
+		System.out.println(new StringBuilder().append("call task, scan path: ").append(scanPath).append(", disk name: ").append(diskName));
+		List<FileInfo> scanPathList = new LinkedList<>();
+		Files.walkFileTree(scanPath, new PlainFileVisitor(scanPathList, excludePathList));
+		System.out.println(new StringBuilder().append("finish task, scan path: ").append(scanPath).append(", disk name: ").append(diskName));
+		return new ScanResult(this.diskName, scanPathList);
 	}
 }

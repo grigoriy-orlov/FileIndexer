@@ -66,7 +66,7 @@ public class SimpleParamsProcessorTest{
 		List<Path> excludePathList = new LinkedList<>();
 		excludePathList.add(Paths.get("/var").toAbsolutePath().normalize());
 
-		SortedMap<Path, List<Path>> sortedPathMap = processor.sortExcludePathsToSearchPaths(resultPathList, excludePathList);
+		SortedMap<Path, List<Path>> sortedPathMap = processor.sortExcludePathsToSearchPath(resultPathList, excludePathList);
 
 		assertEquals(0, sortedPathMap.size());
 	}
@@ -81,7 +81,7 @@ public class SimpleParamsProcessorTest{
 		List<Path> excludePathList = new LinkedList<>();
 		excludePathList.add(Paths.get("/var").toAbsolutePath().normalize());
 
-		SortedMap<Path, List<Path>> sortedPathMap = processor.sortExcludePathsToSearchPaths(resultPathList, excludePathList);
+		SortedMap<Path, List<Path>> sortedPathMap = processor.sortExcludePathsToSearchPath(resultPathList, excludePathList);
 
 		assertEquals(0, sortedPathMap.size());
 	}
@@ -96,7 +96,7 @@ public class SimpleParamsProcessorTest{
 		List<Path> excludePathList = new LinkedList<>();
 		excludePathList.add(Paths.get("/var/log").toAbsolutePath().normalize());
 
-		SortedMap<Path, List<Path>> sortedPathMap = processor.sortExcludePathsToSearchPaths(resultPathList, excludePathList);
+		SortedMap<Path, List<Path>> sortedPathMap = processor.sortExcludePathsToSearchPath(resultPathList, excludePathList);
 
 		assertEquals(1, sortedPathMap.size());
 		assertEquals(Paths.get("/var/").toAbsolutePath().normalize(), sortedPathMap.firstKey().toAbsolutePath().normalize());

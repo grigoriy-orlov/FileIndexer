@@ -1,12 +1,17 @@
 package ru.ares4322.filescanner;
 
 import java.nio.file.Path;
+import java.sql.Timestamp;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedMap;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -36,38 +41,72 @@ public class NIOScanner implements FileScanner {
 	public void scan(ScanParams params) {
 		SimpleScanParams scanParams = (SimpleScanParams) params;
 
-		List<Path> resultPathList = new LinkedList<>();
+		List<FileInfo> resultPathList = new LinkedList<>();
+		int taskCounter = 0;
+		//создаем фиксированный пул потоков, размер которого равен количеству дисков, на которых расположены наши файлы
 
-		//создаем фиксированный пул потоков, размер которого равен количеству процессоров (ядер).
-		//больше делать смысла нет, так как сканирование - операция
+		Map<String, SortedMap<Path, List<Path>>> diskToPathMap = scanParams.getDiskToExcludePathsToScanPathMap();
+		ExecutorService executorService = Executors.newFixedThreadPool(diskToPathMap.size());
+		ExecutorCompletionService<ScanResult> executorCompletionService = new ExecutorCompletionService<>(executorService);
+		for (Iterator<Entry<String, SortedMap<Path, List<Path>>>> it = diskToPathMap.entrySet().iterator(); it.hasNext();) {
+			Entry<String, SortedMap<Path, List<Path>>> entry = it.next();
+			String diskName = entry.getKey();
+			SortedMap<Path, List<Path>> scanToExcludeListMap = entry.getValue();
+			Path scanPath = scanToExcludeListMap.firstKey();
+			List<Path> excludePathList = scanToExcludeListMap.get(scanPath);
+			scanToExcludeListMap.remove(scanPath);
+			if (scanToExcludeListMap.isEmpty()) {
+				it.remove();
+			}
 
-		//@todo можно сделать разделение
-		int processorsQuantity = Runtime.getRuntime().availableProcessors();
-		ExecutorService executor = Executors.newFixedThreadPool(processorsQuantity);
-		
-		Map<Path, List<Path>> sortedPathMap = scanParams.getExcludePathsToScanPathMap();
-		List<Future<List<Path>>> futures = new LinkedList<>();
-
-		for (Map.Entry<Path, List<Path>> entry : sortedPathMap.entrySet()) {
-			Path searchPath = entry.getKey();
-			List<Path> excludePathList = entry.getValue();
-			futures.add(executor.submit(new PlainFileVisitorTask(searchPath, excludePathList)));
+			executorCompletionService.submit(new PlainFileVisitorTask(scanPath, excludePathList, diskName));
+			taskCounter++;
 		}
 
-		for (Iterator<Future<List<Path>>> it = futures.iterator(); it.hasNext();) {
-			Future<List<Path>> future = it.next();
-			if (future != null) {
-				try {
-					resultPathList.addAll(future.get());
-				} catch (InterruptedException | ExecutionException ex) {
-					System.err.println("ERROR: " + ex.getMessage());
+		while (true) {
+			try {
+				if (taskCounter > 0) {
+					Future<ScanResult> future = executorCompletionService.take();
+					taskCounter--;
+
+					ScanResult scanResult = future.get();
+					resultPathList.addAll(scanResult.resultPathList);
+					String diskName = scanResult.diskName;
+
+					SortedMap<Path, List<Path>> scanToExcludeListMap = diskToPathMap.get(diskName);
+					if (scanToExcludeListMap != null) {
+						Path scanPath = scanToExcludeListMap.firstKey();
+						List<Path> excludePathList = scanToExcludeListMap.get(scanPath);
+						scanToExcludeListMap.remove(scanPath);
+						if (scanToExcludeListMap.isEmpty()) {
+							diskToPathMap.remove(diskName);
+						}
+						executorCompletionService.submit(new PlainFileVisitorTask(scanPath, excludePathList, diskName));
+						taskCounter++;
+					}
+				} else {
+					break;
 				}
+			} catch (InterruptedException | ExecutionException ex) {
+				System.err.println("ERROR: " + ex);
+				taskCounter--;
 			}
 		}
-		executor.shutdown();
 
-		Collections.sort(resultPathList);
+		executorService.shutdown();
 
-		Utils.writePathListToFile(scanParams.getOutputFilePath(), resultPathList, scanParams.getOutputFileCharset());
+		System.out.println("start sort result list, size: " + resultPathList.size() + " " + new Timestamp(System.currentTimeMillis()));
+		Collections.sort(resultPathList, new Comparator<FileInfo>() {
+			@Override
+			public int compare(FileInfo o1, FileInfo o2) {
+				return o1.absPath.compareTo(o2.absPath);
+			}
+		});
+
+		System.out.println("finish sort result list" + new Timestamp(System.currentTimeMillis()));
+
+		System.out.println("start write to disk " + new Timestamp(System.currentTimeMillis()));
+		Utils.writePathListToFileExt(scanParams.getOutputFilePath(), resultPathList, scanParams.getOutputFileCharset());
+		System.out.println("finish write to disk " + new Timestamp(System.currentTimeMillis()));
 	}
 }
