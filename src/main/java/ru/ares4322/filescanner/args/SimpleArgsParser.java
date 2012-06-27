@@ -1,6 +1,5 @@
 package ru.ares4322.filescanner.args;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -8,13 +7,22 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * Парсер параметров командной строки
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
 public class SimpleArgsParser implements ArgsParser {
 
+	/**
+	 * Разбирает параметры командной строки и преобразует их в SimpleScanParams.
+	 * В случае ошибки бросает ArgsParsingException
+	 *
+	 * @param args Массив параметров командной строки
+	 * @return ScanParams
+	 * @throws ArgsParsingException
+	 */
 	@Override
-	public SearchParams parse(String[] args) throws ArgsParsingException {
+	public ScanParams parse(String[] args) throws ArgsParsingException {
 		if (args == null || args.length == 0) {
 			throw new ArgsParsingException("you must specify at least one argument");
 		}
@@ -34,9 +42,15 @@ public class SimpleArgsParser implements ArgsParser {
 			searchPathList = this.pathArrayToList(searchPaths);
 			excludePathList = this.pathArrayToList(excludePaths);
 		}
-		return (new SimpleSearchParams()).setExcludePathList(excludePathList).setSearchPathList(searchPathList);
+		return (new SimpleScanParams()).setExcludePathList(excludePathList).setSearchPathList(searchPathList);
 	}
 
+	/**
+	 * Преобразует массив путей файлов(String) в список путей (Path)
+	 *
+	 * @param pathArray Массив путей файлов (String)
+	 * @return Список путей (Path)
+	 */
 	private List<Path> pathArrayToList(String[] pathArray) {
 		List<Path> pathList = new LinkedList<>();
 
@@ -44,15 +58,7 @@ public class SimpleArgsParser implements ArgsParser {
 			for (int i = 0, l = pathArray.length; i < l; i++) {
 				String searchPathName = pathArray[i];
 				Path searchPath = Paths.get(searchPathName).toAbsolutePath().normalize();
-				if (Files.exists(searchPath)) {
-					if (Files.isSymbolicLink(searchPath) == false) {
-						pathList.add(searchPath);
-					} else {
-						System.err.println("symbolic link (not processed): " + searchPathName);
-					}
-				} else {
-					System.err.println("not exists: " + searchPathName);
-				}
+				pathList.add(searchPath);
 			}
 		}
 

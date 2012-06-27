@@ -1,6 +1,7 @@
 package ru.ares4322.filescanner.args;
 
 /**
+ * Класс исключения для ошибок обработки параметров сканирования
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */

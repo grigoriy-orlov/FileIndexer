@@ -12,19 +12,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import ru.ares4322.filescanner.args.SearchParams;
-import ru.ares4322.filescanner.args.SimpleSearchParams;
+import ru.ares4322.filescanner.args.ScanParams;
+import ru.ares4322.filescanner.args.SimpleScanParams;
 
 /**
  * рабочий комп , /home/ares4322/Knowledge - 1 мин 24 сек
  *
  * @author ares4322
  */
-public class OIOMultithreadedLockedSearcher implements Searcher {
+public class OIOLockedScanner implements FileScanner {
 
 	@Override
-	public void search(SearchParams params) {
-		SimpleSearchParams searchParams = (SimpleSearchParams) params;
+	public void scan(ScanParams params) {
+		SimpleScanParams searchParams = (SimpleScanParams) params;
 
 		List<Path> resultPathList = new LinkedList<>();
 
@@ -35,7 +35,7 @@ public class OIOMultithreadedLockedSearcher implements Searcher {
 		Lock lock = new ReentrantLock();
 		Condition condition = lock.newCondition();
 
-		Map<Path, List<Path>> sortedPathMap = searchParams.getSortedPathMap();
+		Map<Path, List<Path>> sortedPathMap = searchParams.getExcludePathsToScanPathMap();
 		for (Map.Entry<Path, List<Path>> entry : sortedPathMap.entrySet()) {
 			Path searchPath = entry.getKey();
 			List<Path> excludePathList = entry.getValue();
@@ -58,7 +58,7 @@ public class OIOMultithreadedLockedSearcher implements Searcher {
 
 		Collections.sort(resultPathList);
 
-		Utils.writePathListToFileExt2(searchParams.getOutputFilePath(), resultPathList, searchParams.getOutputFileCharset());
+		Utils.writePathListToFile(searchParams.getOutputFilePath(), resultPathList, searchParams.getOutputFileCharset());
 
 	}
 }

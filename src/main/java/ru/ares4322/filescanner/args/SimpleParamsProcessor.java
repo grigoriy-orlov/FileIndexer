@@ -1,5 +1,6 @@
 package ru.ares4322.filescanner.args;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -9,76 +10,141 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
+ * Обработчик параметров сканирования
  *
  * @author ares4322
  */
 public class SimpleParamsProcessor implements ParamsProcessor {
 
+	/**
+	 * Обрабатывает параметры сканирования (сортирует, удаляет избытосность и
+	 * т.д.) для последующей передачи сканеру
+	 *
+	 * @param params Исходные параметры сканирования
+	 * @return Обработанные параметры сканирования
+	 * @throws ParamsProcessingException
+	 */
 	@Override
-	public SearchParams process(SearchParams params) throws ParamsProcessingException {
-		SimpleSearchParams searchParams = (SimpleSearchParams) params;
+	public ScanParams process(ScanParams params) throws ParamsProcessingException {
+		SimpleScanParams scanParams = (SimpleScanParams) params;
 
-		if (searchParams == null) {
-			throw new ParamsProcessingException("search params is null");
+		if (scanParams == null) {
+			throw new ParamsProcessingException("scan params is null");
 		}
-		if (searchParams.searchPathList == null) {
-			throw new ParamsProcessingException("search path list is null");
+		if (scanParams.scanPathList == null) {
+			throw new ParamsProcessingException("scan path list is null");
 		}
-		if (searchParams.excludePathList == null) {
+		if (scanParams.excludePathList == null) {
 			throw new ParamsProcessingException("exclude path list is null");
 		}
-		Collections.sort(searchParams.searchPathList);
-		Collections.sort(searchParams.excludePathList);
 
-		this.removePathRedunduncy(searchParams.searchPathList);
-		this.removePathRedunduncy(searchParams.excludePathList);
+		this.removeNonexistentPaths(scanParams.scanPathList);
+		this.removeNonexistentPaths(scanParams.excludePathList);
 
-		searchParams.setSortedPathMap(this.getSortedPathList(searchParams.searchPathList, searchParams.excludePathList));
+		this.removeSymlinksPaths(scanParams.scanPathList);
+		this.removeSymlinksPaths(scanParams.excludePathList);
 
-		return searchParams;
+		this.sort(scanParams.scanPathList);
+		this.sort(scanParams.excludePathList);
+
+		this.removePathRedunduncy(scanParams.scanPathList);
+		this.removePathRedunduncy(scanParams.excludePathList);
+
+		scanParams.setExcludePathsToScanPathMap(this.sortExcludePathsToSearchPaths(scanParams.scanPathList, scanParams.excludePathList));
+
+		return scanParams;
 	}
 
-	protected List<Path> removePathRedunduncy(List<Path> pathList) {
-		for (ListIterator<Path> extIt = pathList.listIterator(); extIt.hasNext();) {
-			Path extSearchPath = extIt.next();
-			for (ListIterator<Path> intIt = pathList.listIterator(extIt.nextIndex()); intIt.hasNext();) {
-				Path intSearchPath = intIt.next();
-				if (intSearchPath.toAbsolutePath().startsWith(extSearchPath.toAbsolutePath())) {
+	/**
+	 * Сортирует список путей сканирования
+	 *
+	 * @param pathList Список путей для обработки
+	 */
+	protected void sort(List<Path> pathList) {
+		Collections.sort(pathList);
+	}
+
+	/**
+	 * Удаляет пути для несуществующих файлов
+	 *
+	 * @param pathList Список путей для обработки
+	 */
+	protected void removeNonexistentPaths(List<Path> pathList) {
+		for (ListIterator<Path> it = pathList.listIterator(); it.hasNext();) {
+			Path scanPath = it.next();
+			if (Files.exists(scanPath) == false) {
+				it.remove();
+				System.err.println("not exists: " + scanPath);
+			}
+		}
+	}
+
+	/**
+	 * Удаляет пути для символических ссылок
+	 *
+	 * @param pathList Список путей для обработки
+	 */
+	protected void removeSymlinksPaths(List<Path> pathList) {
+		for (ListIterator<Path> it = pathList.listIterator(); it.hasNext();) {
+			Path scanPath = it.next();
+			if (Files.isSymbolicLink(scanPath) == true) {
+				it.remove();
+				System.err.println("symbolic link (not processed): " + scanPath);
+			}
+
+		}
+	}
+
+	/**
+	 * Удаляет избыточность в путях. Если для исходного пути есть путь, который
+	 * включает этот исходный путь в себя, то исходный путь можно удалить из
+	 * списка путей. Список должен быть отсортирован.
+	 *
+	 * @param sortedPathList Сортированный список путей для обработки
+	 * @return Список путей без избытости
+	 */
+	protected List<Path> removePathRedunduncy(List<Path> sortedPathList) {
+		for (ListIterator<Path> extIt = sortedPathList.listIterator(); extIt.hasNext();) {
+			Path extScanPath = extIt.next();
+			for (ListIterator<Path> intIt = sortedPathList.listIterator(extIt.nextIndex()); intIt.hasNext();) {
+				Path intScanPath = intIt.next();
+				if (intScanPath.toAbsolutePath().startsWith(extScanPath.toAbsolutePath())) {
 					intIt.remove();
 				}
 			}
 		}
-		return pathList;
+		return sortedPathList;
 	}
 
 	/**
-	 * @todo можно оптимизировать, если не сравнивать все со всеми, а идти
-	 * параллельно по спискам и сравнивать сначала лексикографически(так как
-	 * списки отсортированы) SortedMap используется, так как если файлы для
-	 * поиска будут отсортированы, то и конечная суммарная последовательность
-	 * файлов будет изначально более отсортированная
+	 * Рассортировывает пути исключения по путям сканирования.
+	 *
+	 * @param scanPathList Списков путей сканирования
+	 * @param excludePathList Список путей исключения
+	 * @return Словарь, в котором ключи - пути сканирования, а значения - списки
+	 * путей исключения
 	 */
-	protected SortedMap<Path, List<Path>> getSortedPathList(List<Path> searchPathList, List<Path> excludePathList) {
+	protected SortedMap<Path, List<Path>> sortExcludePathsToSearchPaths(List<Path> scanPathList, List<Path> excludePathList) {
 		SortedMap<Path, List<Path>> resultMap = new TreeMap<>();
-		boolean put = true;
+		boolean put;
 
-		for (ListIterator<Path> searchPathIt = searchPathList.listIterator(); searchPathIt.hasNext();) {
-			Path searchPath = searchPathIt.next();
+		for (ListIterator<Path> scanPathIt = scanPathList.listIterator(); scanPathIt.hasNext();) {
+			Path scanPath = scanPathIt.next();
 			List<Path> connectedExcludePathList = new LinkedList<>();
 			put = true;
 			for (ListIterator<Path> excludePathIt = excludePathList.listIterator(); excludePathIt.hasNext();) {
 				Path excludePath = excludePathIt.next();
-				if (excludePath.compareTo(searchPath) > 0 && excludePath.toAbsolutePath().startsWith(searchPath.toAbsolutePath())) {
+				if (excludePath.compareTo(scanPath) > 0 && excludePath.toAbsolutePath().startsWith(scanPath.toAbsolutePath())) {
 					//если путь исключения начинается с пути поиска, то этот путь поиска добавляем в поиск
 					connectedExcludePathList.add(excludePath);
-				} else if (excludePath.compareTo(searchPath) <= 0 && searchPath.toAbsolutePath().startsWith(excludePath.toAbsolutePath())) {
-					//если путь исключения охватывает путь поиска, то этот путь поиска не добавляем в поиск
+				} else if (excludePath.compareTo(scanPath) <= 0 && scanPath.toAbsolutePath().startsWith(excludePath.toAbsolutePath())) {
+					//если путь исключения включает путь поиска, то этот путь поиска не добавляем в поиск
 					put = false;
 					break;
 				}
 			}
 			if (put) {
-				resultMap.put(searchPath, connectedExcludePathList);
+				resultMap.put(scanPath, connectedExcludePathList);
 			}
 		}
 

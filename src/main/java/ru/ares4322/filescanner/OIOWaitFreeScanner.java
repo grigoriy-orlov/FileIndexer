@@ -3,8 +3,8 @@ package ru.ares4322.filescanner;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
-import ru.ares4322.filescanner.args.SearchParams;
-import ru.ares4322.filescanner.args.SimpleSearchParams;
+import ru.ares4322.filescanner.args.ScanParams;
+import ru.ares4322.filescanner.args.SimpleScanParams;
 
 /**
  * рабочий комп , /home/ares4322/Knowledge - менее секунды рабочий комп ,
@@ -12,11 +12,11 @@ import ru.ares4322.filescanner.args.SimpleSearchParams;
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class OIOMultithreadedWaitFreeSearcher implements Searcher {
+public class OIOWaitFreeScanner implements FileScanner {
 
 	@Override
-	public void search(SearchParams params) {
-		SimpleSearchParams searchParams = (SimpleSearchParams) params;
+	public void scan(ScanParams params) {
+		SimpleScanParams searchParams = (SimpleScanParams) params;
 
 		final int processorQuantity = Runtime.getRuntime().availableProcessors();
 		ExecutorService executor = Executors.newFixedThreadPool(processorQuantity);
@@ -24,7 +24,7 @@ public class OIOMultithreadedWaitFreeSearcher implements Searcher {
 
 		List<Path> resultPathList = new LinkedList<>();
 
-		Map<Path, List<Path>> sortedPathMap = searchParams.getSortedPathMap();
+		Map<Path, List<Path>> sortedPathMap = searchParams.getExcludePathsToScanPathMap();
 		for (Map.Entry<Path, List<Path>> entry : sortedPathMap.entrySet()) {
 			Path searchPath = entry.getKey();
 			List<Path> excludePathList = entry.getValue();
@@ -49,6 +49,6 @@ public class OIOMultithreadedWaitFreeSearcher implements Searcher {
 
 		Collections.sort(resultPathList);
 
-		Utils.writePathListToFileExt2(searchParams.getOutputFilePath(), resultPathList, searchParams.getOutputFileCharset());
+		Utils.writePathListToFile(searchParams.getOutputFilePath(), resultPathList, searchParams.getOutputFileCharset());
 	}
 }

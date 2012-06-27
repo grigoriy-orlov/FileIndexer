@@ -36,7 +36,7 @@ public class SimpleArgsParserTest {
 		String[] args = {""};
 
 		SimpleArgsParser parser = new SimpleArgsParser();
-		SearchParams result = parser.parse(args);
+		ScanParams result = parser.parse(args);
 
 		assertEquals(1, result.getSearchPathList().size());
 
@@ -50,7 +50,7 @@ public class SimpleArgsParserTest {
 
 		String[] args = {searchPath, "-", excludePath};
 		SimpleArgsParser parser = new SimpleArgsParser();
-		SimpleSearchParams result = (SimpleSearchParams) parser.parse(args);
+		SimpleScanParams result = (SimpleScanParams) parser.parse(args);
 
 		assertEquals(1, result.getSearchPathList().size());
 		assertEquals(1, result.getExcludePathList().size());
@@ -68,7 +68,7 @@ public class SimpleArgsParserTest {
 
 		String[] args = {searchPath1, searchPath2, "-", excludePath1, excludePath2};
 		SimpleArgsParser parser = new SimpleArgsParser();
-		SimpleSearchParams result = (SimpleSearchParams) parser.parse(args);
+		SimpleScanParams result = (SimpleScanParams) parser.parse(args);
 
 		assertEquals(2, result.getSearchPathList().size());
 		assertEquals(2, result.getExcludePathList().size());

@@ -5,22 +5,23 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
+ * Параметры сканирования
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class SearchParams {
+public class ScanParams {
 
-	protected List<Path> searchPathList;
+	protected List<Path> scanPathList;
 	protected Path outputFilePath;
 	protected Charset outputFileCharset;
 
 	public List<Path> getSearchPathList() {
 
-		return searchPathList;
+		return scanPathList;
 	}
 
-	public SearchParams setSearchPathList(List<Path> searchPathList) {
-		this.searchPathList = searchPathList;
+	public ScanParams setSearchPathList(List<Path> scanPathList) {
+		this.scanPathList = scanPathList;
 		return this;
 	}
 

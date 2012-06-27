@@ -10,10 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * @WARNING Если работать с массивами или методами get()/set() списков, то
- * максимальный адресуемый индекс 2,147,483,647 Для обхода этого ограничения
- * надо использовать add() и LinkedList (у ArrayList это медленно)
- *
  * Название SimpleFileVisitor уже занято в библиотеке
  *
  * @author ares4322
@@ -33,6 +29,8 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 	public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 		FileVisitResult result = FileVisitResult.CONTINUE;
 		boolean addPath = true;
+
+		//@todo прикрутить тут Utils.searchPathInList и можно сделать удаление найденного пути из списка исключений
 		for (Iterator<Path> it = this.excludePathList.iterator(); it.hasNext();) {
 			Path excludePath = it.next();
 			if (dir.startsWith(excludePath) || dir.equals(excludePath)) {
@@ -49,7 +47,7 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-		boolean addPath = Utils.searchPathInList(file, this.excludePathList);
+		boolean addPath = Utils.searchPathInListNew(file, this.excludePathList);
 
 		if (addPath == true) {
 			this.addPath(file);

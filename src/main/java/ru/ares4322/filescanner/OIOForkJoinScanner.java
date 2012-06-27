@@ -3,8 +3,8 @@ package ru.ares4322.filescanner;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
-import ru.ares4322.filescanner.args.SearchParams;
-import ru.ares4322.filescanner.args.SimpleSearchParams;
+import ru.ares4322.filescanner.args.ScanParams;
+import ru.ares4322.filescanner.args.SimpleScanParams;
 
 /**
  * домашний комп, /home/ares4322/work - хз сколько первый раз и 14 секунд после
@@ -12,17 +12,17 @@ import ru.ares4322.filescanner.args.SimpleSearchParams;
  *
  * @author ares4322
  */
-public class OIOForkJoinSearcher implements Searcher {
+public class OIOForkJoinScanner implements FileScanner {
 
 	@Override
-	public void search(SearchParams params) {
-		SimpleSearchParams searchParams = (SimpleSearchParams) params;
+	public void scan(ScanParams params) {
+		SimpleScanParams searchParams = (SimpleScanParams) params;
 
 		List<Path> resultPathList = new LinkedList<>();
 
 		final int availableProcessors = Runtime.getRuntime().availableProcessors();
 		ForkJoinPool forkJoinPool = new ForkJoinPool(availableProcessors);
-		Map<Path, List<Path>> sortedPathMap = searchParams.getSortedPathMap();
+		Map<Path, List<Path>> sortedPathMap = searchParams.getExcludePathsToScanPathMap();
 		for (Map.Entry<Path, List<Path>> entry : sortedPathMap.entrySet()) {
 			Path searchPath = entry.getKey();
 			List<Path> excludePathList = entry.getValue();
@@ -32,7 +32,7 @@ public class OIOForkJoinSearcher implements Searcher {
 		}
 		Collections.sort(resultPathList);
 
-		Utils.writePathListToFileExt2(searchParams.getOutputFilePath(), resultPathList, searchParams.getOutputFileCharset());
+		Utils.writePathListToFile(searchParams.getOutputFilePath(), resultPathList, searchParams.getOutputFileCharset());
 
 	}
 }

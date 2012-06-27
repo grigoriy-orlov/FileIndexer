@@ -5,54 +5,27 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 /**
+ * Класс различных утилит
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
 public class Utils {
 
-	public static void writePathListToFile(String resultFilePath, List<String> pathList, String charset) {
-		PrintWriter writer = null;
-		try {
-			Path resultFile = Files.createFile(Paths.get(resultFilePath));
-			writer = new PrintWriter(Files.newBufferedWriter(resultFile, Charset.forName(charset)));
-			for (Iterator<String> it = pathList.iterator(); it.hasNext();) {
-				writer.println(it.next());
-			}
-		} catch (IOException ex) {
-			System.err.println("ERROR: " + ex.getMessage());
-		} finally {
-			if (writer != null) {
-				writer.close();
-			}
-		}
-	}
-
-	public static void writePathListToFileExt(String resultFilePath, List<Path> pathList, String charset) {
-		PrintWriter writer = null;
-		try {
-			Files.deleteIfExists(Paths.get(resultFilePath));
-			Path resultFile = Files.createFile(Paths.get(resultFilePath));
-			writer = new PrintWriter(Files.newBufferedWriter(resultFile, Charset.forName(charset)));
-			for (Iterator<Path> it = pathList.iterator(); it.hasNext();) {
-				writer.println(it.next().toAbsolutePath());
-			}
-		} catch (IOException ex) {
-			System.err.println("ERROR: " + ex.getMessage());
-		} finally {
-			if (writer != null) {
-				writer.close();
-			}
-		}
-	}
-
-	public static void writePathListToFileExt2(Path resultFilePath, List<Path> pathList, Charset charset) {
+	/**
+	 * Пишет в файл пути из списка в соответствии с шаблоном из ТЗ
+	 *
+	 * @param resultFilePath Путь файла, в который необходимо писать
+	 * @param pathList Список путей для записи
+	 * @param charset Кодировка итогового файла
+	 */
+	public static void writePathListToFile(Path resultFilePath, List<Path> pathList, Charset charset) {
 		PrintWriter writer = null;
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd");
 		try {
@@ -81,8 +54,23 @@ public class Utils {
 	}
 
 	/**
-	 * @todo Можно попробовать заменить перебор Collections.binarySearch()
-	 * @todo Так же можно сделать здесь удаление найденного элемента
+	 * @todo разобраться, почему неправльно работает
+	 * Ищет путь в отсортированном списке путей
+	 *
+	 * @param path Путь, который ищем
+	 * @param sortedPathList Отсортированный список путей, в котором ищем
+	 * @return Возвращает - найден или нет
+	 */
+	public static boolean searchPathInListNew(Path path, List<Path> sortedPathList) {
+		return (Collections.binarySearch(sortedPathList, path) >= 0) ? false : true;
+	}
+
+	/**
+	 * Ищет путь в списке путей
+	 *
+	 * @param path Путь, который ищем
+	 * @param pathList Список путей, в котором ищем
+	 * @return Возвращает - найден или нет
 	 */
 	public static boolean searchPathInList(Path path, List<Path> pathList) {
 		boolean result = true;

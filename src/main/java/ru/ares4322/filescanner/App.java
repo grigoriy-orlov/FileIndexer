@@ -38,15 +38,8 @@
  */
 package ru.ares4322.filescanner;
 
-import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -58,27 +51,26 @@ import ru.ares4322.filescanner.args.*;
  */
 public class App {
 
-	//@todo сделать обработку IOException и InterruptedException
-	public static void main(String[] args) throws URISyntaxException {
+	public static void main(String[] args) {
 		try {
 			String outputFileCharsetName = "UTF-8";
-			String outputFilePathname = "/home/ares4322/tmp/result.txt";
+			String outputFilePathName = "/home/ares4322/tmp/result.txt";
 
-			SimpleSearchParamsFactory searchParamsFactory = new SimpleSearchParamsFactory();
+			SimpleScanParamsFactory searchParamsFactory = new SimpleScanParamsFactory();
 
-			ArgsParser paramsParser = searchParamsFactory.buildParamsParser();
+			ArgsParser paramsParser = searchParamsFactory.buildArgsParser();
 			ParamsProcessor paramsProcessor = searchParamsFactory.buildParamsProcessor();
 
-			SearchParams searchParams = paramsParser.parse(args);
+			ScanParams searchParams = paramsParser.parse(args);
 			searchParams = paramsProcessor.process(searchParams);
 			searchParams.setOutputFileCharset(Charset.forName(outputFileCharsetName));
-			searchParams.setOutputFilePath(Paths.get(outputFilePathname));
+			searchParams.setOutputFilePath(Paths.get(outputFilePathName));
 
 			ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 			scheduledExecutor.scheduleWithFixedDelay(new ProgressBarTask(), 0, 1, TimeUnit.SECONDS);
 
-			Searcher searcher = SearcherFactory.build(SearcherEnum.NIO_SINGLE_THREADED);
-			searcher.search(searchParams);
+			FileScanner searcher = FileScannerFactory.build(FileScannerEnum.NIO);
+			searcher.scan(searchParams);
 
 			scheduledExecutor.shutdown();
 
@@ -86,28 +78,5 @@ public class App {
 			System.out.println("Error: " + ex.getMessage());
 		}
 
-	}
-
-	private static void memoryTest() {
-		int testListLength = 10000000;
-		System.out.println("Memory before (Mb): " + Runtime.getRuntime().freeMemory() / 1024 / 1024);
-		List<String> testList = new ArrayList<>(testListLength);
-		for (int i = 0; i < testListLength; i++) {
-			testList.add("/path/path/path/path");
-		}
-		System.out.println("Memory after (Mb): " + Runtime.getRuntime().freeMemory() / 1024 / 1024);
-		System.exit(0);
-	}
-
-	private static boolean testNIONetworkLinuxSearching() throws URISyntaxException {
-		Path netPath = Paths.get(new URI("file:///ntcserv/share/text.txt"));
-		System.out.println("nio path: " + netPath.toAbsolutePath());
-		return Files.exists(netPath);
-	}
-
-	private static boolean testOIONetworkLinuxSearching() {
-		File netFile = new File("file:///ntcserv/share/text.txt");
-		System.out.println("oio path: " + netFile.getAbsolutePath());
-		return netFile.exists();
 	}
 }
