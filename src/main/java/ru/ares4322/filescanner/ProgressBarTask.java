@@ -1,6 +1,8 @@
 package ru.ares4322.filescanner;
 
 /**
+ * Класс задачи для вывода в консоль строки прогресса сканирования. Каждый 6й
+ * запуск выводится точка, каждый 60й палочка
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */

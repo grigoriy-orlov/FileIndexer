@@ -8,7 +8,7 @@ import java.util.Date;
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class FileInfo {
+public class FileInfo implements Comparable<FileInfo> {
 
 	Path path;
 	String absPath;
@@ -23,5 +23,10 @@ public class FileInfo {
 		this.absPath = absPath;
 		this.size = size;
 		this.lastModTime = lastModTime;
+	}
+
+	@Override
+	public int compareTo(FileInfo o) {
+		return this.path.compareTo(o.path);
 	}
 }

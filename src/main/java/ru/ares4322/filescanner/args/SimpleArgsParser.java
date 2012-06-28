@@ -56,9 +56,12 @@ public class SimpleArgsParser implements ArgsParser {
 
 		if (pathArray != null) {
 			for (int i = 0, l = pathArray.length; i < l; i++) {
-				String searchPathName = pathArray[i];
-				Path searchPath = Paths.get(searchPathName).toAbsolutePath().normalize();
-				pathList.add(searchPath);
+				String scanPathName = pathArray[i];
+				if (scanPathName.equals("")) {
+					System.err.println("wrong scan path: '" + scanPathName + "'");
+				} else {
+					pathList.add(Paths.get(scanPathName));
+				}
 			}
 		}
 

@@ -10,5 +10,5 @@ import ru.ares4322.filescanner.args.ScanParams;
  */
 public interface FileScanner {
 
-	public void scan(ScanParams params);
+	public void scan(ScanParams scanParams, ScanResultOutputParams scanResultOutputParams) throws ScanException;
 }

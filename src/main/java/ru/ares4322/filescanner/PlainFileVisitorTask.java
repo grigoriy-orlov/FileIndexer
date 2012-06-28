@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
+ * Класс задачи сканирования. На вход передается путь для сканирования, список
+ * путей исключения сканирования и название диска. Сканирование осуществляется с
+ * помощью java,file.nio.Files.walkFileTree()
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */

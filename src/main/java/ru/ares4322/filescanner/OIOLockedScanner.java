@@ -23,7 +23,7 @@ import ru.ares4322.filescanner.args.SimpleScanParams;
 public class OIOLockedScanner implements FileScanner {
 
 	@Override
-	public void scan(ScanParams params) {
+	public void scan(ScanParams params, ScanResultOutputParams outputParams) {
 		SimpleScanParams searchParams = (SimpleScanParams) params;
 
 		List<Path> resultPathList = new LinkedList<>();
@@ -58,7 +58,7 @@ public class OIOLockedScanner implements FileScanner {
 
 		Collections.sort(resultPathList);
 
-		Utils.writePathListToFile(searchParams.getOutputFilePath(), resultPathList, searchParams.getOutputFileCharset());
+		Utils.writePathListToFile(outputParams.getOutputFilePath(), resultPathList, outputParams.getOutputFileCharset());
 
 	}
 }

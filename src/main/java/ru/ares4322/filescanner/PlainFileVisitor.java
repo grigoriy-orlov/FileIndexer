@@ -9,11 +9,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- * Название SimpleFileVisitor уже занято в библиотеке
+ * Методы класса вызываются средой исполнения при переборе файлов. Название
+ * SimpleFileVisitor уже занято в библиотеке
  *
  * @author ares4322
  */
@@ -84,7 +83,7 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 		try {
 			this.scanPathList.add(new FileInfo(path, path.toAbsolutePath().toString(), Files.size(path), new Date(Files.getLastModifiedTime(path).toMillis())));
 		} catch (IOException ex) {
-			System.err.println("Fail save file info for "+path+", cause: "+ex);
+			System.err.println("Fail save file info for " + path + ", cause: " + ex);
 		}
 	}
 }

@@ -9,10 +9,10 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
- *
+ * @todo тут еще можно сделать проверку раскидывания словарей по дискам
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class SimpleParamsProcessorTest{
+public class SimpleParamsProcessorTest {
 
 	@Test(expected = ParamsProcessingException.class)
 	public void testProcess1() throws Exception {

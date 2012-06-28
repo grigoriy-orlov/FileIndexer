@@ -40,9 +40,6 @@ package ru.ares4322.filescanner;
 
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import ru.ares4322.filescanner.args.*;
 
 /**
@@ -52,9 +49,13 @@ import ru.ares4322.filescanner.args.*;
 public class App {
 
 	public static void main(String[] args) {
+		String outputFileCharsetName = "UTF-8";
+		String outputFilePathName = "/home/ares4322/tmp/result.txt";
+
+		ProgressBar progressBar = null;
 		try {
-			String outputFileCharsetName = "UTF-8";
-			String outputFilePathName = "/home/ares4322/tmp/result.txt";
+			progressBar = ProgressBarFactory.buildSimpleConsoleProgressBar();
+			progressBar.start();
 
 			SimpleScanParamsFactory scanParamsFactory = new SimpleScanParamsFactory();
 
@@ -63,20 +64,22 @@ public class App {
 
 			ScanParams scanParams = paramsParser.parse(args);
 			scanParams = paramsProcessor.process(scanParams);
-			scanParams.setOutputFileCharset(Charset.forName(outputFileCharsetName));
-			scanParams.setOutputFilePath(Paths.get(outputFilePathName));
 
-			ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-			scheduledExecutor.scheduleWithFixedDelay(new ProgressBarTask(), 0, 1, TimeUnit.SECONDS);
+			ScanResultOutputParams outputParams = new ScanResultOutputParams();
+			outputParams.setOutputFileCharset(Charset.forName(outputFileCharsetName));
+			outputParams.setOutputFilePath(Paths.get(outputFilePathName));
 
-			FileScanner scaner = FileScannerFactory.build(FileScannerEnum.NIO);
-			scaner.scan(scanParams);
+			FileScanner scaner = FileScannerFactory.buildNIOScanner();
+			scaner.scan(scanParams, outputParams);
 
-			scheduledExecutor.shutdown();
-
-		} catch (ClassNotFoundException | ParamsProcessingException | ArgsParsingException ex) {
+		} catch (ParamsProcessingException | ArgsParsingException | ScanException ex) {
 			System.out.println("Error: " + ex.getMessage());
+		} finally {
+			if (progressBar != null) {
+				progressBar.stop();
+			}
 		}
+
 		System.out.println("last line of program");
 	}
 }

@@ -1,7 +1,6 @@
 package ru.ares4322.filescanner.args;
 
 import java.io.IOException;
-import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -12,8 +11,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Обработчик параметров сканирования
@@ -23,7 +20,7 @@ import java.util.logging.Logger;
 public class SimpleParamsProcessor implements ParamsProcessor {
 
 	/**
-	 * Обрабатывает параметры сканирования (сортирует, удаляет избытосность и
+	 * Обрабатывает параметры сканирования (сортирует, удаляет избыточность и
 	 * т.д.) для последующей передачи сканеру
 	 *
 	 * @param params Исходные параметры сканирования
@@ -58,7 +55,8 @@ public class SimpleParamsProcessor implements ParamsProcessor {
 
 		scanParams.setExcludePathsToScanPathMap(this.sortExcludePathsToSearchPath(scanParams.scanPathList, scanParams.excludePathList));
 
-		scanParams.setDiskToExcludePathsToScanPathMap(this.sortPathMapsToDisk(scanParams.getExcludePathsToScanPathMap()));
+		scanParams.setPathMapsToDisk(this.sortPathMapsToDisk(scanParams.getExcludePathsToScanPathMap()));
+
 		return scanParams;
 	}
 
@@ -158,12 +156,22 @@ public class SimpleParamsProcessor implements ParamsProcessor {
 		return resultMap;
 	}
 
+	/**
+	 * Рассортировывает словари с путями сканирования и исключения по дискам, к
+	 * которым эти пути относятся. Диск в данном случае определяется по названию
+	 * хранилища (Files.getFileStore(scanPath).name()) для пути
+	 *
+	 * @param sortedPathMap Словарь с путями сканирования и исключения
+	 * @return Словарь с путями сканирования и исключения рассортированный по
+	 * дискам
+	 */
 	protected Map<String, SortedMap<Path, List<Path>>> sortPathMapsToDisk(SortedMap<Path, List<Path>> sortedPathMap) {
 		Map<String, SortedMap<Path, List<Path>>> pathMapsByDisks = new HashMap<>(sortedPathMap.size());
 
 		for (SortedMap.Entry<Path, List<Path>> entry : sortedPathMap.entrySet()) {
 			Path scanPath = entry.getKey();
 			List<Path> excludePathList = entry.getValue();
+			//если не можем определить хранилище для пути, то сохраняем его для названия диска, равной пустой строке
 			String diskName = "";
 			try {
 				diskName = Files.getFileStore(scanPath).name();

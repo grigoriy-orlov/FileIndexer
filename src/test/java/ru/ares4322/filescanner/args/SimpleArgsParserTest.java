@@ -33,14 +33,14 @@ public class SimpleArgsParserTest {
 
 	@Test()
 	public void testParse4() throws Exception {
-		String[] args = {""};
+		String[] args = {"", "/home"};
 
 		SimpleArgsParser parser = new SimpleArgsParser();
 		ScanParams result = parser.parse(args);
 
 		assertEquals(1, result.getSearchPathList().size());
 
-		assertEquals(Paths.get("./").normalize().toAbsolutePath(), result.getSearchPathList().get(0).normalize().toAbsolutePath());
+		assertEquals(Paths.get("/home").normalize().toAbsolutePath(), result.getSearchPathList().get(0).normalize().toAbsolutePath());
 	}
 
 	@Test()

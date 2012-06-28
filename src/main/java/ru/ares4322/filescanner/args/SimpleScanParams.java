@@ -14,7 +14,7 @@ public class SimpleScanParams extends ScanParams {
 
 	protected List<Path> excludePathList;
 	protected SortedMap<Path, List<Path>> excludePathsToScanPathMap;
-	protected Map<String, SortedMap<Path, List<Path>>> diskToExcludePathsToScanPathMap;
+	protected Map<String, SortedMap<Path, List<Path>>> pathMapsToDisk;
 
 	public List<Path> getExcludePathList() {
 		return excludePathList;
@@ -33,11 +33,11 @@ public class SimpleScanParams extends ScanParams {
 		this.excludePathsToScanPathMap = excludePathsToScanPathMap;
 	}
 
-	public Map<String, SortedMap<Path, List<Path>>> getDiskToExcludePathsToScanPathMap() {
-		return diskToExcludePathsToScanPathMap;
+	public Map<String, SortedMap<Path, List<Path>>> getPathMapsToDisk() {
+		return pathMapsToDisk;
 	}
 
-	public void setDiskToExcludePathsToScanPathMap(Map<String, SortedMap<Path, List<Path>>> diskToExcludePathsToScanPathMap) {
-		this.diskToExcludePathsToScanPathMap = diskToExcludePathsToScanPathMap;
+	public void setPathMapsToDisk(Map<String, SortedMap<Path, List<Path>>> pathMapsToDisk) {
+		this.pathMapsToDisk = pathMapsToDisk;
 	}
 }
