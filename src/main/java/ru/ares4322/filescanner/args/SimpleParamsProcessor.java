@@ -13,7 +13,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * Обработчик параметров сканирования
+ * @todo вместо списк тут можно использовать SortedSet, так как на надо работать
+ * с отсортированным набором и в нем не должно быть повторений Обработчик
+ * параметров сканирования
  *
  * @author ares4322
  */
@@ -79,7 +81,7 @@ public class SimpleParamsProcessor implements ParamsProcessor {
 			Path scanPath = it.next();
 			if (Files.exists(scanPath) == false) {
 				it.remove();
-				System.err.println("not exists: " + scanPath);
+				System.err.println(new StringBuilder(2).append("WARNING: file not exists: ").append(scanPath));
 			}
 		}
 	}
@@ -94,7 +96,7 @@ public class SimpleParamsProcessor implements ParamsProcessor {
 			Path scanPath = it.next();
 			if (Files.isSymbolicLink(scanPath) == true) {
 				it.remove();
-				System.err.println("symbolic link (not processed): " + scanPath);
+				System.err.println(new StringBuilder(2).append("WARNING: symbolic link (not processed): ").append(scanPath));
 			}
 
 		}
@@ -176,7 +178,7 @@ public class SimpleParamsProcessor implements ParamsProcessor {
 			try {
 				diskName = Files.getFileStore(scanPath).name();
 			} catch (IOException ex) {
-				System.err.println(new StringBuilder(4).append("can't get filestore of ").append(scanPath).append(", error: ").append(ex.getMessage()));
+				System.err.println(new StringBuilder(4).append("WARNING: can't get filestore of ").append(scanPath).append(", cause: ").append(ex.getMessage()));
 			}
 
 			SortedMap<Path, List<Path>> pathMapForDisk = pathMapsByDisks.get(diskName);

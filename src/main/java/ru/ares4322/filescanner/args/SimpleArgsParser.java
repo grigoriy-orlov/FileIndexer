@@ -1,5 +1,6 @@
 package ru.ares4322.filescanner.args;
 
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -51,20 +52,23 @@ public class SimpleArgsParser implements ArgsParser {
 	 * @param pathArray Массив путей файлов (String)
 	 * @return Список путей (Path)
 	 */
-	private List<Path> pathArrayToList(String[] pathArray) {
-		List<Path> pathList = new LinkedList<>();
-
+	private List<Path> pathArrayToList(String[] pathArray) throws ArgsParsingException {
+            List<Path> pathList = new LinkedList<>();
+            try{
 		if (pathArray != null) {
 			for (int i = 0, l = pathArray.length; i < l; i++) {
 				String scanPathName = pathArray[i];
 				if (scanPathName.equals("")) {
-					System.err.println("wrong scan path: '" + scanPathName + "'");
+					System.err.println("WARNING: empty scan path in params");
 				} else {
 					pathList.add(Paths.get(scanPathName));
 				}
 			}
 		}
-
+            }catch(InvalidPathException ex){
+                throw new ArgsParsingException(ex.getMessage());
+            }
 		return pathList;
+            
 	}
 }

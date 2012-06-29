@@ -11,17 +11,16 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Методы класса вызываются средой исполнения при переборе файлов. Название
- * SimpleFileVisitor уже занято в библиотеке
+ * Методы класса вызываются средой исполнения при переборе файлов.
  *
  * @author ares4322
  */
-public class PlainFileVisitor implements FileVisitor<Path> {
+public class SimpleFileVisitor implements FileVisitor<Path> {
 
 	protected List<FileInfo> scanPathList;
 	protected List<Path> excludePathList;
 
-	public PlainFileVisitor(List<FileInfo> scanPathList, List<Path> excludePathList) {
+	public SimpleFileVisitor(List<FileInfo> scanPathList, List<Path> excludePathList) {
 		this.scanPathList = scanPathList;
 		this.excludePathList = excludePathList;
 	}
@@ -70,7 +69,7 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 		} else {
 			preffix = "Fail visit unknown filesystem entity: ";
 		}
-		System.err.println((new StringBuilder(2)).append(preffix).append(file.toAbsolutePath()));
+		System.err.println((new StringBuilder(5)).append("WARNING: ").append(preffix).append(file.toAbsolutePath()));
 		return FileVisitResult.CONTINUE;
 	}
 
@@ -83,7 +82,7 @@ public class PlainFileVisitor implements FileVisitor<Path> {
 		try {
 			this.scanPathList.add(new FileInfo(path, path.toAbsolutePath().toString(), Files.size(path), new Date(Files.getLastModifiedTime(path).toMillis())));
 		} catch (IOException ex) {
-			System.err.println("Fail save file info for " + path + ", cause: " + ex);
+			System.err.println((new StringBuilder(4)).append("WARNING: Fail save file info for ").append(path).append(", cause: ").append(ex.getMessage()));
 		}
 	}
 }

@@ -9,29 +9,31 @@ import java.util.concurrent.Callable;
 /**
  * Класс задачи сканирования. На вход передается путь для сканирования, список
  * путей исключения сканирования и название диска. Сканирование осуществляется с
- * помощью java,file.nio.Files.walkFileTree()
+ * помощью java,file.nio.Files.walkFileTree(). Возвращает список
+ * объектов---информации-о-файлах. Используется LinkedList, так как ArrayList не
+ * подходит из-за того, что неизвестно начальное количество объектов для
+ * добавления в него и со списком чаще будут выполняться операции добавления, а
+ * операции взятия по индеску не будет. Но если будет нужно можно использовать
+ * ArrayList
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class PlainFileVisitorTask implements Callable<ScanResult> {
+public class SimpleFileVisitorTask implements Callable<ScanResult> {
 
 	protected List<Path> excludePathList;
 	protected Path scanPath;
 	protected String diskName;
 
-	public PlainFileVisitorTask(Path scanPath, List<Path> excludePathList, String diskName) {
+	public SimpleFileVisitorTask(Path scanPath, List<Path> excludePathList, String diskName) {
 		this.scanPath = scanPath;
 		this.excludePathList = excludePathList;
 		this.diskName = diskName;
-		System.out.println(new StringBuilder().append("create task, scan path: ").append(scanPath).append(", disk name: ").append(diskName));
 	}
 
 	@Override
 	public ScanResult call() throws Exception {
-		System.out.println(new StringBuilder().append("call task, scan path: ").append(scanPath).append(", disk name: ").append(diskName));
 		List<FileInfo> scanPathList = new LinkedList<>();
-		Files.walkFileTree(scanPath, new PlainFileVisitor(scanPathList, excludePathList));
-		System.out.println(new StringBuilder().append("finish task, scan path: ").append(scanPath).append(", disk name: ").append(diskName));
+		Files.walkFileTree(scanPath, new SimpleFileVisitor(scanPathList, excludePathList));
 		return new ScanResult(this.diskName, scanPathList);
 	}
 }

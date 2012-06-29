@@ -1,7 +1,6 @@
 package ru.ares4322.filescanner;
 
 import java.nio.file.Path;
-import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -22,7 +21,7 @@ import ru.ares4322.filescanner.args.SimpleScanParams;
  * таким образом, чтобы одновременно не выполнялось сканирование для путей с
  * одного диска. Количество потоков делается равным количеству дисков, а не
  * количеству ядер (процессоров), так как сканирование все равно блокируется на
- * вводе/выводе
+ * вводе/выводе.
  *
  * @author ares4322
  */
@@ -57,7 +56,7 @@ public class NIOScanner implements FileScanner {
 				it.remove();
 			}
 
-			executorCompletionService.submit(new PlainFileVisitorTask(scanPath, excludePathList, diskName));
+			executorCompletionService.submit(new SimpleFileVisitorTask(scanPath, excludePathList, diskName));
 			curTaskCounter++;
 		}
 
@@ -82,28 +81,22 @@ public class NIOScanner implements FileScanner {
 						if (scanToExcludeListMap.isEmpty()) {
 							diskToPathMap.remove(diskName);
 						}
-						executorCompletionService.submit(new PlainFileVisitorTask(scanPath, excludePathList, diskName));
+						executorCompletionService.submit(new SimpleFileVisitorTask(scanPath, excludePathList, diskName));
 						curTaskCounter++;
 					}
 				} else {
 					break;
 				}
 			} catch (InterruptedException | ExecutionException ex) {
-				System.err.println("ERROR: " + ex);
+				System.err.println(new StringBuilder(2).append("ERROR: ").append(ex.getMessage()));
 				curTaskCounter--;
 			}
 		}
 
 		executorService.shutdown();
 
-		System.out.println("start sort result list, size: " + resultList.size() + " " + new Timestamp(System.currentTimeMillis()));
-
 		Collections.sort(resultList);
 
-		System.out.println("finish sort result list" + new Timestamp(System.currentTimeMillis()));
-
-		System.out.println("start write to disk " + new Timestamp(System.currentTimeMillis()));
 		Utils.writePathListToFileExt(outputParams.getOutputFilePath(), resultList, outputParams.getOutputFileCharset());
-		System.out.println("finish write to disk " + new Timestamp(System.currentTimeMillis()));
 	}
 }

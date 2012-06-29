@@ -45,7 +45,7 @@ public class Utils {
 				writer.println(stringBuilder);
 			}
 		} catch (IOException ex) {
-			System.err.println("ERROR: " + ex.getMessage());
+			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex.getMessage()));
 		} finally {
 			if (writer != null) {
 				writer.close();
@@ -68,19 +68,18 @@ public class Utils {
 			Path resultFile = Files.createFile(resultFilePath);
 			writer = new PrintWriter(Files.newBufferedWriter(resultFile, charset));
 			for (Iterator<FileInfo> it = fileInfoList.iterator(); it.hasNext();) {
-				StringBuilder stringBuilder = new StringBuilder();
 				FileInfo fileInfo = it.next();
-				stringBuilder.append("[file = ");
-				stringBuilder.append(fileInfo.absPath);
-				stringBuilder.append("\ndate = ");
-				stringBuilder.append(formatter.format(fileInfo.lastModTime));
-				stringBuilder.append("\nsize = ");
-				stringBuilder.append(fileInfo.size);
-				stringBuilder.append("]");
-				writer.println(stringBuilder);
+				writer.println("[");
+				writer.print("file = ");
+				writer.println(fileInfo.absPath);
+				writer.print("date = ");
+				writer.println(formatter.format(fileInfo.lastModTime));
+				writer.print("size = ");
+				writer.print(fileInfo.size);
+				writer.print("]");
 			}
 		} catch (IOException ex) {
-			System.err.println("ERROR: " + ex.getMessage());
+			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex.getMessage()));
 		} finally {
 			if (writer != null) {
 				writer.close();
@@ -117,5 +116,24 @@ public class Utils {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Возвращает тип операционной системы
+	 *
+	 * @return Тип операционной системы
+	 */
+	public static OSTypeEnum getOSName() {
+		OSTypeEnum os = OSTypeEnum.UNKNOWN;
+
+		if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1) {
+			os = OSTypeEnum.WINDOWS;
+		} else if (System.getProperty("os.name").toLowerCase().indexOf("linux") > -1) {
+			os = OSTypeEnum.LINUX;
+		} else if (System.getProperty("os.name").toLowerCase().indexOf("mac") > -1) {
+			os = OSTypeEnum.MACOS;
+		}
+
+		return os;
 	}
 }
