@@ -2,7 +2,10 @@ package ru.ares4322.filescanner;
 
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
-import ru.ares4322.filescanner.args.*;
+import ru.ares4322.filescanner.args.ArgsParser;
+import ru.ares4322.filescanner.args.ParamsProcessor;
+import ru.ares4322.filescanner.args.ScanParams;
+import ru.ares4322.filescanner.args.SimpleScanParamsFactory;
 
 /**
  * @todo подумать над внешним буфером и внешней сортировкой
@@ -56,7 +59,7 @@ public class App {
 			outputParams.setOutputFileCharset(Charset.forName(outputFileCharsetName));
 			outputParams.setOutputFilePath(Paths.get(outputFilePathName));
 
-			FileScanner scaner = FileScannerFactory.buildNIOScanner();
+			FileScanner scaner = FileScannerFactory.buildSimpleScanner();
 			scaner.scan(scanParams, outputParams);
 
 			System.out.println("results are in file: "+outputFilePathName);

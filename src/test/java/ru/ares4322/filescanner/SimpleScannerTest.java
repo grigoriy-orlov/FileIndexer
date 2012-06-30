@@ -15,14 +15,14 @@ import ru.ares4322.filescanner.args.SimpleScanParams;
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class NIOScannerTest {
+public class SimpleScannerTest {
 
 	@Test(expected = ScanException.class)
 	public void testScan1() throws Exception {
 		SimpleScanParams params = new SimpleScanParams();
 		params.setPathMapsToDisk(new TreeMap<String, SortedMap<Path, List<Path>>>());
 		ScanResultOutputParams outputParams = null;
-		NIOScanner scanner = new NIOScanner();
+		SimpleScanner scanner = new SimpleScanner();
 		scanner.scan(params, outputParams);
 	}
 }

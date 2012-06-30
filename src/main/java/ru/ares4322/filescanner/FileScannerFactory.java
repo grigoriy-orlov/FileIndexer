@@ -7,7 +7,7 @@ package ru.ares4322.filescanner;
  */
 public class FileScannerFactory {
 
-	public static FileScanner buildNIOScanner() {
-		return new NIOScanner();
+	public static FileScanner buildSimpleScanner() {
+		return new SimpleScanner();
 	}
 }

@@ -25,7 +25,7 @@ import ru.ares4322.filescanner.args.SimpleScanParams;
  *
  * @author ares4322
  */
-public class NIOScanner implements FileScanner {
+public class SimpleScanner implements FileScanner {
 
 	@Override
 	public void scan(ScanParams params, ScanResultOutputParams outputParams) throws ScanException {
