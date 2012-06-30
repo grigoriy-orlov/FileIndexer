@@ -1,11 +1,10 @@
 package ru.ares4322.filescanner;
 
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import ru.ares4322.filescanner.args.ArgsParser;
-import ru.ares4322.filescanner.args.ParamsProcessor;
-import ru.ares4322.filescanner.args.ScanParams;
-import ru.ares4322.filescanner.args.SimpleScanParamsFactory;
+import ru.ares4322.filescanner.args.*;
 
 /**
  * @todo подумать над внешним буфером и внешней сортировкой
@@ -29,21 +28,10 @@ public class App {
 	public static void main(String[] args) {
 		String outputFileCharsetName = "UTF-8";
 
-		String outputFilePathName;
 		ProgressBar progressBar = null;
 
 		try {
-			switch (Utils.getOSName()) {
-				case LINUX:
-				case MACOS:
-					outputFilePathName = "/tmp/filescanner/result.txt";
-					break;
-				case WINDOWS:
-					outputFilePathName = "C:\\windows\\temp\\filescanner\\result.txt";
-					break;
-				default:
-					throw new Exception("unsupported operating system");
-			}
+			Path resultFilePath = prepareResultFile();
 			progressBar = ProgressBarFactory.buildSimpleConsoleProgressBar();
 			progressBar.start();
 
@@ -57,12 +45,14 @@ public class App {
 
 			ScanResultOutputParams outputParams = new ScanResultOutputParams();
 			outputParams.setOutputFileCharset(Charset.forName(outputFileCharsetName));
-			outputParams.setOutputFilePath(Paths.get(outputFilePathName));
+			outputParams.setOutputFilePath(resultFilePath);
 
 			FileScanner scaner = FileScannerFactory.buildSimpleScanner();
 			scaner.scan(scanParams, outputParams);
 
-			System.out.println("results are in file: "+outputFilePathName);
+			System.out.println("results are in file: " + resultFilePath.toAbsolutePath());
+		} catch (ArgsParsingException | ParamsProcessingException | ScanException ex) {
+			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex.getMessage()));
 		} catch (Exception ex) {
 			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex.getMessage()));
 		} finally {
@@ -70,5 +60,36 @@ public class App {
 				progressBar.stop();
 			}
 		}
+	}
+
+	public static Path prepareResultFile() throws Exception {
+		Path resultDirPath;
+		Path resultFilePath;
+		switch (Utils.getOSName()) {
+			case LINUX:
+			case MACOS:
+				resultDirPath = Paths.get("/tmp/filescanner/");
+				resultFilePath = Paths.get("/tmp/filescanner/result.txt");
+				if (Files.exists(resultDirPath)) {
+					Files.deleteIfExists(resultFilePath);
+				} else {
+					Files.createDirectory(resultDirPath);
+					Files.createFile(resultFilePath);
+				}
+				break;
+			case WINDOWS:
+				resultDirPath = Paths.get("C:\\windows\\temp\\filescanner");
+				resultFilePath = Paths.get("C:\\windows\\temp\\filescanner\\result.txt");
+				if (Files.exists(resultDirPath)) {
+					Files.deleteIfExists(resultFilePath);
+				} else {
+					Files.createDirectory(resultDirPath);
+					Files.createFile(resultFilePath);
+				}
+				break;
+			default:
+				throw new Exception("unsupported operating system");
+		}
+		return resultFilePath;
 	}
 }

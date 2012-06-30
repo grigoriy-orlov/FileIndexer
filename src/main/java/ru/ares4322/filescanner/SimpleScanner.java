@@ -1,18 +1,9 @@
 package ru.ares4322.filescanner;
 
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.*;
+import java.util.concurrent.*;
 import ru.ares4322.filescanner.args.ScanParams;
 import ru.ares4322.filescanner.args.SimpleScanParams;
 
