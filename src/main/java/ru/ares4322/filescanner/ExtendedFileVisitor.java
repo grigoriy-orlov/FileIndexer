@@ -1,11 +1,13 @@
 package ru.ares4322.filescanner;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -13,19 +15,22 @@ import java.util.List;
 /**
  * Методы класса вызываются средой исполнения при переборе файлов. Данные о
  * файле(время модификации, размер) запрашиваются здесь, так как эта информация
- * уже находится в кеше и доступ к ней будет осуществлен быстро. Если это
- * делать потом, то эта информация может быть уже не в кеше.
+ * уже находится в кеше и доступ к ней будет осуществлен быстро. Если это делать
+ * потом, то эта информация может быть уже не в кеше.
  *
  * @author ares4322
  */
-public class SimpleFileVisitor implements FileVisitor<Path> {
+public class ExtendedFileVisitor implements FileVisitor<Path> {
 
 	protected List<FileInfo> scanPathList;
 	protected List<Path> excludePathList;
+	protected final SimpleDateFormat formatter;
+	private long blockSize;
 
-	public SimpleFileVisitor(List<FileInfo> scanPathList, List<Path> excludePathList) {
-		this.scanPathList = scanPathList;
+	public ExtendedFileVisitor(List<Path> excludePathList, long blockSize) {
 		this.excludePathList = excludePathList;
+		this.blockSize = blockSize;
+		this.formatter = new SimpleDateFormat("yyyy.MM.dd");
 	}
 
 	//@todo здесь можно заменить перебор на двоичный поиск с подбором
@@ -83,7 +88,14 @@ public class SimpleFileVisitor implements FileVisitor<Path> {
 
 	private void addPath(Path path) {
 		try {
-			this.scanPathList.add(new FileInfo(path, path.toAbsolutePath().toString(), Files.size(path), new Date(Files.getLastModifiedTime(path).toMillis())));
+			//@todo надо что-нибудь делать с Timezone?
+			StringBuilder stringBuilder = new StringBuilder(7);
+			stringBuilder.append(path);
+			stringBuilder.append(" ");
+			stringBuilder.append(formatter.format(new Date(Files.getLastModifiedTime(path).toMillis())));
+			stringBuilder.append(" ");
+			stringBuilder.append(Files.size(path));
+			//this.bufferWriter.println(stringBuilder);
 		} catch (IOException ex) {
 			System.err.println((new StringBuilder(4)).append("WARNING: Fail save file info for ").append(path).append(", cause: ").append(ex.getMessage()));
 		}

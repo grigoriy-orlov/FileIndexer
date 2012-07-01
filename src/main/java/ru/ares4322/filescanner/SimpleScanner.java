@@ -32,7 +32,7 @@ public class SimpleScanner implements FileScanner {
 			throw new ScanException("No paths to scan");
 		}
 		ExecutorService executorService = Executors.newFixedThreadPool(diskQuantity);
-		ExecutorCompletionService<ScanResult> executorCompletionService = new ExecutorCompletionService<>(executorService);
+		ExecutorCompletionService<SimpleScanResult> executorCompletionService = new ExecutorCompletionService<>(executorService);
 
 		//заполняем пул задачами для каждого диска
 		//при получении задачи удаляем ее из словаря и если словарь после этого пуст, то удаляем и его
@@ -57,10 +57,10 @@ public class SimpleScanner implements FileScanner {
 		while (true) {
 			try {
 				if (curTaskCounter > 0) {
-					Future<ScanResult> future = executorCompletionService.take();
+					Future<SimpleScanResult> future = executorCompletionService.take();
 					curTaskCounter--;
 
-					ScanResult scanResult = future.get();
+					SimpleScanResult scanResult = future.get();
 					resultList.addAll(scanResult.resultPathList);
 					String diskName = scanResult.diskName;
 

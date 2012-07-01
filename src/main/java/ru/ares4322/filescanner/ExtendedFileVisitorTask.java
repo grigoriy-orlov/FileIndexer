@@ -1,5 +1,6 @@
 package ru.ares4322.filescanner;
 
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
@@ -18,22 +19,25 @@ import java.util.concurrent.Callable;
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class SimpleFileVisitorTask implements Callable<SimpleScanResult> {
+public class ExtendedFileVisitorTask implements Callable<ExtendedScanResult> {
 
 	protected List<Path> excludePathList;
 	protected Path scanPath;
 	protected String diskName;
+	private long blockSize;
 
-	public SimpleFileVisitorTask(Path scanPath, List<Path> excludePathList, String diskName) {
+	public ExtendedFileVisitorTask(Path scanPath, List<Path> excludePathList, String diskName, long blockSize) {
 		this.scanPath = scanPath;
 		this.excludePathList = excludePathList;
 		this.diskName = diskName;
+		this.blockSize = blockSize;
 	}
 
 	@Override
-	public SimpleScanResult call() throws Exception {
-		List<FileInfo> scanPathList = new LinkedList<>();
-		Files.walkFileTree(scanPath, new SimpleFileVisitor(scanPathList, excludePathList));
-		return new SimpleScanResult(this.diskName, scanPathList);
+	public ExtendedScanResult call() throws Exception {
+		LinkedList<Path> tmpPathList = new LinkedList<>();
+		System.out.println("create task for: '"+this.scanPath.toAbsolutePath()+"'");
+		Files.walkFileTree(scanPath, new ExtendedFileVisitor(excludePathList, blockSize));
+		return new ExtendedScanResult(this.diskName, tmpPathList);
 	}
 }

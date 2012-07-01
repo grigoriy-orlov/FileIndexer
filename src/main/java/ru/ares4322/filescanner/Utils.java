@@ -33,7 +33,7 @@ public class Utils {
 			Path resultFile = Files.createFile(resultFilePath);
 			writer = new PrintWriter(Files.newBufferedWriter(resultFile, charset));
 			for (Iterator<Path> it = pathList.iterator(); it.hasNext();) {
-				StringBuilder stringBuilder = new StringBuilder();
+				StringBuilder stringBuilder = new StringBuilder(7);
 				Path path = it.next();
 				stringBuilder.append("[file = ");
 				stringBuilder.append(path);

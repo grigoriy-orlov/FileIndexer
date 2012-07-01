@@ -9,15 +9,15 @@ import java.util.List;
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
-public class ScanResult {
+public class SimpleScanResult {
 
 	public String diskName;
 	public List<FileInfo> resultPathList;
 
-	public ScanResult() {
+	public SimpleScanResult() {
 	}
 
-	public ScanResult(String diskName, List<FileInfo> resultPathList) {
+	public SimpleScanResult(String diskName, List<FileInfo> resultPathList) {
 		this.diskName = diskName;
 		this.resultPathList = resultPathList;
 	}

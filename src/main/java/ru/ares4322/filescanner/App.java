@@ -8,6 +8,7 @@ import ru.ares4322.filescanner.args.*;
 
 /**
  * @todo подумать над внешним буфером и внешней сортировкой
+ * @todo при переборе можно найти директорию с другого диска и тогда нужно ее перебираться в отдельном потоке
  *
  * Программа сохраняет результаты сканирования каждого пути в память, так как
  * для 1000000 файлов требуется приблизительно 500 Мб. Столько свободной памяти
@@ -47,14 +48,14 @@ public class App {
 			outputParams.setOutputFileCharset(Charset.forName(outputFileCharsetName));
 			outputParams.setOutputFilePath(resultFilePath);
 
-			FileScanner scaner = FileScannerFactory.buildSimpleScanner();
+			FileScanner scaner = FileScannerFactory.buildExtendedScanner();
 			scaner.scan(scanParams, outputParams);
 
 			System.out.println("results are in file: " + resultFilePath.toAbsolutePath());
 		} catch (ArgsParsingException | ParamsProcessingException | ScanException ex) {
-			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex.getMessage()));
+			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex));
 		} catch (Exception ex) {
-			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex.getMessage()));
+			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex));
 		} finally {
 			if (progressBar != null) {
 				progressBar.stop();
