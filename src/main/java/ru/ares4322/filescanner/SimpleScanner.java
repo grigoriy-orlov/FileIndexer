@@ -1,14 +1,15 @@
 package ru.ares4322.filescanner;
 
 import java.nio.file.Path;
-import java.util.Map.Entry;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.*;
 import ru.ares4322.filescanner.args.ScanParams;
 import ru.ares4322.filescanner.args.SimpleScanParams;
 
 /**
- * Сканер файлов с помощью nio-пакета из JDK7. Распараллеливает сканирование
+ * Сканер файлов с помощью nio-пакета из JDK7. Использует только ОЗУ для
+ * промежуточного хранения информации о файлах. Распараллеливает сканирование
  * таким образом, чтобы одновременно не выполнялось сканирование для путей с
  * одного диска. Количество потоков делается равным количеству дисков, а не
  * количеству ядер (процессоров), так как сканирование все равно блокируется на

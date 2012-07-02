@@ -24,20 +24,20 @@ public class ExtendedFileVisitorTask implements Callable<ExtendedScanResult> {
 	protected List<Path> excludePathList;
 	protected Path scanPath;
 	protected String diskName;
-	private long blockSize;
+	protected final PrintWriter tempWriter;
 
-	public ExtendedFileVisitorTask(Path scanPath, List<Path> excludePathList, String diskName, long blockSize) {
+	public ExtendedFileVisitorTask(Path scanPath, List<Path> excludePathList, String diskName, PrintWriter tempWriter) {
 		this.scanPath = scanPath;
 		this.excludePathList = excludePathList;
 		this.diskName = diskName;
-		this.blockSize = blockSize;
+		this.tempWriter = tempWriter;
 	}
 
 	@Override
 	public ExtendedScanResult call() throws Exception {
 		LinkedList<Path> tmpPathList = new LinkedList<>();
 		System.out.println("create task for: '"+this.scanPath.toAbsolutePath()+"'");
-		Files.walkFileTree(scanPath, new ExtendedFileVisitor(excludePathList, blockSize));
+		Files.walkFileTree(scanPath, new ExtendedFileVisitor(excludePathList, tempWriter));
 		return new ExtendedScanResult(this.diskName, tmpPathList);
 	}
 }

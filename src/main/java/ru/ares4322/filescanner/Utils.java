@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -17,41 +16,6 @@ import java.util.List;
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
 public class Utils {
-
-	/**
-	 * Пишет в файл пути из списка в соответствии с шаблоном из ТЗ
-	 *
-	 * @param resultFilePath Путь файла, в который необходимо писать
-	 * @param pathList Список путей для записи
-	 * @param charset Кодировка итогового файла
-	 */
-	public static void writePathListToFile(Path resultFilePath, List<Path> pathList, Charset charset) {
-		PrintWriter writer = null;
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd");
-		try {
-			Files.deleteIfExists(resultFilePath);
-			Path resultFile = Files.createFile(resultFilePath);
-			writer = new PrintWriter(Files.newBufferedWriter(resultFile, charset));
-			for (Iterator<Path> it = pathList.iterator(); it.hasNext();) {
-				StringBuilder stringBuilder = new StringBuilder(7);
-				Path path = it.next();
-				stringBuilder.append("[file = ");
-				stringBuilder.append(path);
-				stringBuilder.append("\ndate = ");
-				stringBuilder.append(formatter.format(new Date(Files.getLastModifiedTime(path).toMillis())));
-				stringBuilder.append("\nsize = ");
-				stringBuilder.append(Files.size(path));
-				stringBuilder.append("]");
-				writer.println(stringBuilder);
-			}
-		} catch (IOException ex) {
-			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex.getMessage()));
-		} finally {
-			if (writer != null) {
-				writer.close();
-			}
-		}
-	}
 
 	/**
 	 * Пишет в файл пути из списка в соответствии с шаблоном из ТЗ

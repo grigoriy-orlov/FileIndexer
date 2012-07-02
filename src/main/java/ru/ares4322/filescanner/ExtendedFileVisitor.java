@@ -25,11 +25,11 @@ public class ExtendedFileVisitor implements FileVisitor<Path> {
 	protected List<FileInfo> scanPathList;
 	protected List<Path> excludePathList;
 	protected final SimpleDateFormat formatter;
-	private long blockSize;
+	private final PrintWriter tempWriter;
 
-	public ExtendedFileVisitor(List<Path> excludePathList, long blockSize) {
+	public ExtendedFileVisitor(List<Path> excludePathList, PrintWriter tempWriter) {
 		this.excludePathList = excludePathList;
-		this.blockSize = blockSize;
+		this.tempWriter = tempWriter;
 		this.formatter = new SimpleDateFormat("yyyy.MM.dd");
 	}
 
@@ -95,7 +95,7 @@ public class ExtendedFileVisitor implements FileVisitor<Path> {
 			stringBuilder.append(formatter.format(new Date(Files.getLastModifiedTime(path).toMillis())));
 			stringBuilder.append(" ");
 			stringBuilder.append(Files.size(path));
-			//this.bufferWriter.println(stringBuilder);
+			this.tempWriter.println(stringBuilder);
 		} catch (IOException ex) {
 			System.err.println((new StringBuilder(4)).append("WARNING: Fail save file info for ").append(path).append(", cause: ").append(ex.getMessage()));
 		}
