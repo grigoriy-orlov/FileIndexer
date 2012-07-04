@@ -7,14 +7,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * Методы класса вызываются средой исполнения при переборе файлов. Данные о
  * файле(время модификации, размер) запрашиваются здесь, так как эта информация
- * уже находится в кеше и доступ к ней будет осуществлен быстро. Если это
- * делать потом, то эта информация может быть уже не в кеше.
+ * при запросе будет уже находится в кеше и доступ к ней будет осуществлен
+ * быстро. Если это делать потом, то эта информация может быть уже не в кеше и,
+ * соответственно, возможно обращение к диску. Каждый файл проверяется на
+ * исключение по списку путей исключения. Результаты сканированяи пишутся в
+ * список.
  *
  * @author ares4322
  */
@@ -28,30 +30,30 @@ public class SimpleFileVisitor implements FileVisitor<Path> {
 		this.excludePathList = excludePathList;
 	}
 
-	//@todo здесь можно заменить перебор на двоичный поиск с подбором
+	/*
+	 * Вызывается перед входом в каталог. Ищем данный каталог в списке
+	 * исключений и если нашли, то пропускаем его и удаляем найденный путь
+	 * исключения из списка.
+	 */
 	@Override
 	public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
 		FileVisitResult result = FileVisitResult.CONTINUE;
-		boolean addPath = true;
+		boolean addPath = !Utils.searchPathInListWithRemove(dir, this.excludePathList);
 
-		//@todo прикрутить тут Utils.scanPathInList и можно сделать удаление найденного пути из списка исключений
-		for (Iterator<Path> it = this.excludePathList.iterator(); it.hasNext();) {
-			Path excludePath = it.next();
-			if (dir.startsWith(excludePath) || dir.equals(excludePath)) {
-				result = FileVisitResult.SKIP_SUBTREE;
-				addPath = false;
-				break;
-			}
-		}
 		if (addPath == true) {
 			this.addPath(dir);
+		} else {
+			result = FileVisitResult.SKIP_SUBTREE;
 		}
 		return result;
 	}
 
+	/*
+	 * Вызывается при сканировании файла
+	 */
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-		boolean addPath = Utils.searchPathInListNew(file, this.excludePathList);
+		boolean addPath = !Utils.searchPathInListWithRemove(file, this.excludePathList);
 
 		if (addPath == true) {
 			this.addPath(file);
@@ -60,6 +62,9 @@ public class SimpleFileVisitor implements FileVisitor<Path> {
 		return FileVisitResult.CONTINUE;
 	}
 
+	/**
+	 * Вызывается при ошибке сканирования файла
+	 */
 	@Override
 	public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
 		String preffix;
@@ -76,11 +81,17 @@ public class SimpleFileVisitor implements FileVisitor<Path> {
 		return FileVisitResult.CONTINUE;
 	}
 
+	/*
+	 * Вызывается при выходе их каталога
+	 */
 	@Override
 	public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 		return FileVisitResult.CONTINUE;
 	}
 
+	/**
+	 * Добавялет путь в итоговый список. Сразу записывается информация о файле.
+	 */
 	private void addPath(Path path) {
 		try {
 			this.scanPathList.add(new FileInfo(path, path.toAbsolutePath().toString(), Files.size(path), new Date(Files.getLastModifiedTime(path).toMillis())));

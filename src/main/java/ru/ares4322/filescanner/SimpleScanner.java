@@ -1,8 +1,8 @@
 package ru.ares4322.filescanner;
 
 import java.nio.file.Path;
-import java.util.*;
 import java.util.Map.Entry;
+import java.util.*;
 import java.util.concurrent.*;
 import ru.ares4322.filescanner.args.ScanParams;
 import ru.ares4322.filescanner.args.SimpleScanParams;
@@ -13,7 +13,7 @@ import ru.ares4322.filescanner.args.SimpleScanParams;
  * таким образом, чтобы одновременно не выполнялось сканирование для путей с
  * одного диска. Количество потоков делается равным количеству дисков, а не
  * количеству ядер (процессоров), так как сканирование все равно блокируется на
- * вводе/выводе.
+ * вводе/выводе. Сохраняет результаты в памяти, сортирует и пишет в итоговый файл.
  *
  * @author ares4322
  */

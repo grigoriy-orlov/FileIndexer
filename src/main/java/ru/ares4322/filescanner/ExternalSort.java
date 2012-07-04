@@ -1,33 +1,20 @@
 package ru.ares4322.filescanner;
 
-/**
- *
- * @author Gregory Orlov <orlov@navtelecom.ru>
- */
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.*;
 
 /**
- * Goal: offer a generic external-memory sorting program in Java.
+ * Алгоритм внешней сортировки. Разбивает сортируемый файл на промежуточные
+ * файлы такого размера, чтобы каждый из них мог поместиться целиком в память.
+ * Затем сортирует их. Далее сливает их в один, читая из каждого по строке и
+ * записывая наименьшую в итоговый файл. По-умолчанию предел количества
+ * промежуточных файлов - 1024. Кодировка по-умолчанию UTF-8. При дальнейшем
+ * развитии можно вынести настройки данного алгоритма (например, предел
+ * количества временных файлов) в параметры командной строки.
  *
-* It must be : - hackable (easy to adapt) - scalable to large files - sensibly
- * efficient.
- *
-* This software is in the public domain.
- *
-* Usage: java com/google/code/externalsorting/ExternalSort somefile.txt out.txt
- *
-* You can change the default maximal number of temporary files with the -t
- * flag: java com/google/code/externalsorting/ExternalSort somefile.txt out.txt
- * -t 3
- *
-* For very large files, you might want to use an appropriate flag to allocate
- * more memory to the Java VM: java -Xms2G
- * com/google/code/externalsorting/ExternalSort somefile.txt out.txt
- *
-* By (in alphabetical order) Philippe Beaudoin, Jon Elsas, Christan Grant,
- * Daniel Haran, Daniel Lemire, April 2010 originally posted at
+ * @author By (in alphabetical order) Philippe Beaudoin, Jon Elsas, Christan
+ * Grant, Daniel Haran, Daniel Lemire, April 2010 originally posted at
  * http://www.daniel-lemire.com/blog/archives/2010/04/01/external-memory-sorting-in-java/
  */
 public class ExternalSort {
@@ -35,22 +22,20 @@ public class ExternalSort {
 	static int DEFAULT_MAXTEMPFILES = 1024;
 	static Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
-	// we divide the file into small blocks. If the blocks
-	// are too small, we shall create too many temporary files.
-	// If they are too big, we shall be using too much memory.
+	/**
+	 * Разбиваем сортируемый файл на блоки. Если блоки будут слишком маленькие,
+	 * то будет слишком много вспомогательных файлов. Если слишком большие, то
+	 * они не влезут в память.
+	 */
 	public static long estimateBestSizeOfBlocks(File filetobesorted, int maxtmpfiles) {
-		long sizeoffile = filetobesorted.length() * 2;
-		/**
-		 * We multiply by two because later on someone insisted on counting the
-		 * memory usage as 2 bytes per character. By this model, loading a file
-		 * with 1 character will use 2 bytes.
-		 */
-		// we don't want to open up much more than maxtmpfiles temporary files, better run
-		// out of memory first.
+		//если промежуточный результат будет не в UTF-8, а в кодировке с меньшим количеством байт на символ, то надо использовать следующую строку
+		//long sizeoffile = filetobesorted.length() * 2;
+		long sizeoffile = filetobesorted.length();
+
+		//изначально не планируется использовать более, чем maxtmpfiles вспомогательных файлов, лучше пусть сначала не хватит памяти
 		long blocksize = sizeoffile / maxtmpfiles + (sizeoffile % maxtmpfiles == 0 ? 0 : 1);
 
-		// on the other hand, we don't want to create many temporary files
-		// for naught. If blocksize is smaller than half the free memory, grow it.
+		//с другой стороны много вспомогательных файлов - тоже плохо. Если размер таких файлов меньше половину доступной памяти - надо этот размер увеличить.
 		long freemem = Runtime.getRuntime().freeMemory();
 		if (blocksize < freemem / 2) {
 			blocksize = freemem / 2;
@@ -59,16 +44,12 @@ public class ExternalSort {
 	}
 
 	/**
-	 * This will simply load the file by blocks of x rows, then sort them
-	 * in-memory, and write the result to temporary files that have to be merged
-	 * later.
-	 *
-	 * @param file some flat file
-	 * @param cmp string comparator
-	 * @return a list of temporary flat files
+	 * Загружает файл блоками заданного размера, сортирует их в памяти и пишет
+	 * блоки во временные файлы. Использует параметры по-умолчанию
 	 */
 	public static List<File> sortInBatch(File file) throws IOException {
 		Comparator<String> comparator = new Comparator<String>() {
+
 			@Override
 			public int compare(String r1, String r2) {
 				return r1.compareTo(r2);
@@ -78,34 +59,25 @@ public class ExternalSort {
 	}
 
 	/**
-	 * This will simply load the file by blocks of x rows, then sort them
-	 * in-memory, and write the result to temporary files that have to be merged
-	 * later. You can specify a bound on the number of temporary files that will
-	 * be created.
-	 *
-	 * @param file some flat file
-	 * @param cmp string comparator
-	 * @param maxtmpfiles maximal number of temporary files
-	 * @param Charset character set to use (can use Charset.defaultCharset())
-	 * @param tmpdirectory location of the temporary files (set to null for
-	 * default location)
-	 * @return a list of temporary flat files
+	 * Загружает файл блоками заданного размера, сортирует их в памяти и пишет
+	 * блоки во временные файлы
 	 */
 	public static List<File> sortInBatch(File file, Comparator<String> cmp, int maxtmpfiles, Charset cs, File tmpdirectory) throws IOException {
-		List<File> files = new ArrayList<File>();
+		List<File> files = new ArrayList<>();
 		BufferedReader fbr = new BufferedReader(new InputStreamReader(new FileInputStream(file), cs));
-		long blocksize = estimateBestSizeOfBlocks(file, maxtmpfiles);// in bytes
+		long blocksize = estimateBestSizeOfBlocks(file, maxtmpfiles);// в байтах
 
 		try {
-			List<String> tmplist = new ArrayList<String>();
+			List<String> tmplist = new ArrayList<>();
 			String line = "";
 			try {
 				while (line != null) {
-					long currentblocksize = 0;// in bytes
+					long currentblocksize = 0;// в байтах
 					while ((currentblocksize < blocksize)
-							&& ((line = fbr.readLine()) != null)) { // as long as you have enough memory
+							&& ((line = fbr.readLine()) != null)) { // пока хватает памяти
 						tmplist.add(line);
-						currentblocksize += line.length() * 2; // java uses 16 bits per character?
+						currentblocksize += line.length();
+						//currentblocksize += line.length() * 2; // если будет поддержка других кодировок
 					}
 					files.add(sortAndSave(tmplist, cmp, cs, tmpdirectory));
 					tmplist.clear();
@@ -123,40 +95,29 @@ public class ExternalSort {
 	}
 
 	/**
-	 * Sort a list and save it to a temporary file
-	 *
-	 * @return the file containing the sorted data
-	 * @param tmplist data to be sorted
-	 * @param cmp string comparator
-	 * @param cs charset to use for output (can use Charset.defaultCharset())
-	 * @param tmpdirectory location of the temporary files (set to null for
-	 * default location)
+	 * Сортирует список и сохраняет его во временный файл
 	 */
 	public static File sortAndSave(List<String> tmplist, Comparator<String> cmp, Charset cs, File tmpdirectory) throws IOException {
 		Collections.sort(tmplist, cmp);
 		File newtmpfile = File.createTempFile("sortInBatch", "flatfile", tmpdirectory);
 		newtmpfile.deleteOnExit();
-		BufferedWriter fbw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newtmpfile), cs));
-		try {
+		try (BufferedWriter fbw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(newtmpfile), cs))) {
 			for (String r : tmplist) {
 				fbw.write(r);
 				fbw.newLine();
 			}
-		} finally {
-			fbw.close();
 		}
 		return newtmpfile;
 	}
 
 	/**
-	 * This merges a bunch of temporary flat files
+	 * Сливает вместе временные файлы
 	 *
-	 * @param files
-	 * @param output file
-	 * @return The number of lines sorted. (P. Beaudoin)
+	 * @return Количество обработанных строки
 	 */
 	public static int mergeSortedFiles(List<File> files, File outputfile) throws IOException {
 		Comparator<String> comparator = new Comparator<String>() {
+
 			@Override
 			public int compare(String r1, String r2) {
 				return r1.compareTo(r2);
@@ -166,16 +127,14 @@ public class ExternalSort {
 	}
 
 	/**
-	 * This merges a bunch of temporary flat files
+	 * Сливает вместе временные файлы
 	 *
-	 * @param files
-	 * @param output file
-	 * @param Charset character set to use to load the strings
-	 * @return The number of lines sorted. (P. Beaudoin)
+	 * @return Количество обработанных строки
 	 */
 	public static int mergeSortedFiles(List<File> files, File outputfile, final Comparator<String> cmp, Charset cs) throws IOException {
 		PriorityQueue<BinaryFileBuffer> pq = new PriorityQueue<>(11,
 				new Comparator<BinaryFileBuffer>() {
+
 					@Override
 					public int compare(BinaryFileBuffer i, BinaryFileBuffer j) {
 						return cmp.compare(i.peek(), j.peek());
@@ -191,6 +150,7 @@ public class ExternalSort {
 			while (pq.size() > 0) {
 				BinaryFileBuffer bfb = pq.poll();
 				String r = bfb.pop();
+				//преобразуем информацию о файле в заданный формат
 				String[] splitedString = r.split("\\s");
 				fbw.write("[");
 				fbw.newLine();
@@ -206,9 +166,9 @@ public class ExternalSort {
 				++rowcounter;
 				if (bfb.empty()) {
 					bfb.fbr.close();
-					bfb.originalfile.delete();// we don't need you anymore
+					bfb.originalfile.delete();// больше не нужен
 				} else {
-					pq.add(bfb); // add it back
+					pq.add(bfb); // добавляем обратно
 				}
 			}
 		} finally {
@@ -221,6 +181,9 @@ public class ExternalSort {
 	}
 }
 
+/**
+ * Класс, с помощью которого получаются верхние строки из файлов
+ */
 class BinaryFileBuffer {
 
 	public static int BUFFERSIZE = 2048;

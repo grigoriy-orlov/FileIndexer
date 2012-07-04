@@ -52,30 +52,30 @@ public class Utils {
 	}
 
 	/**
-	 * @todo разобраться, почему неправльно работает Ищет путь в отсортированном
-	 * списке путей
+	 * Ищет путь в списке путей
 	 *
 	 * @param path Путь, который ищем
 	 * @param sortedPathList Отсортированный список путей, в котором ищем
 	 * @return Возвращает - найден или нет
 	 */
 	public static boolean searchPathInListNew(Path path, List<Path> sortedPathList) {
-		return (Collections.binarySearch(sortedPathList, path) >= 0) ? false : true;
+		return (Collections.binarySearch(sortedPathList, path) >= 0) ? true : false;
 	}
 
 	/**
-	 * Ищет путь в списке путей
+	 * Ищет путь в списке путей и удаляет из списка найденный
 	 *
 	 * @param path Путь, который ищем
 	 * @param pathList Список путей, в котором ищем
 	 * @return Возвращает - найден или нет
 	 */
-	public static boolean searchPathInList(Path path, List<Path> pathList) {
-		boolean result = true;
+	public static boolean searchPathInListWithRemove(Path path, List<Path> pathList) {
+		boolean result = false;
 		for (Iterator<Path> it = pathList.iterator(); it.hasNext();) {
 			Path excludePath = it.next();
 			if (path.equals(excludePath)) {
-				result = false;
+				result = true;
+				it.remove();
 				break;
 			}
 		}

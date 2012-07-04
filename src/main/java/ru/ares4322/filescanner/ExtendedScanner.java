@@ -6,19 +6,22 @@ import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
 import java.util.concurrent.*;
 import ru.ares4322.filescanner.args.ScanParams;
 import ru.ares4322.filescanner.args.SimpleScanParams;
 
 /**
- * Сканер файлов с помощью nio-пакета из JDK7. Использует внешнюю память для
- * промежуточного хранения информации о файлах. Распараллеливает сканирование
+ * Сканер файлов с помощью nio-пакета из JDK7. Распараллеливает сканирование
  * таким образом, чтобы одновременно не выполнялось сканирование для путей с
  * одного диска. Количество потоков делается равным количеству дисков, а не
  * количеству ядер (процессоров), так как сканирование все равно блокируется на
- * вводе/выводе.
+ * вводе/выводе. Сохраняет результаты работы всех потоков в файле, далее этот
+ * файл сортирует, обрабатывает информацию о файлах и выводит в итоговый файл.
  *
  * @author ares4322
  */
@@ -29,8 +32,6 @@ public class ExtendedScanner implements FileScanner {
 		SimpleScanParams scanParams = (SimpleScanParams) params;
 
 		//создаем один файл-буфер для всех потоков.
-		//при дальнейшем развитии программы можно попробовать сделать разбиение на файлы заданного размера(чтобы можно было целиком прочитать в память),
-		//на этапе перебора файлов потоками. но не факт, что это будет быстрее во всех случаях
 		PrintWriter tempWriter = null;
 		try {
 			Path tempFile = Files.createTempFile(null, null);
@@ -102,10 +103,11 @@ public class ExtendedScanner implements FileScanner {
 			tempWriter.flush();
 
 			//разбиваем файл с промежуточными результатами на файлы такого размера, чтобы один такой файл целиком влезал в память.
-			//пере записью на диск сортируем такие файлы
+			//перед записью на диск сортируем такие файлы
 			List<File> l = ExternalSort.sortInBatch(tempFile.toFile());
+			
 			//сливаем временные файлы в один результирующий.
-			//читаем построчно каждый файл и меньшую строку (лексикографически) пишем в результирующий файл
+			//читаем построчно каждый файл и каждый раз пишем в результирующий файл меньшую строку (лексикографически)
 			ExternalSort.mergeSortedFiles(l, outputParams.outputFilePath.toFile());
 
 		} catch (IOException ex) {

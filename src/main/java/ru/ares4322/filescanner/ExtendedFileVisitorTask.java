@@ -14,8 +14,7 @@ import java.util.concurrent.Callable;
  * объектов---информации-о-файлах. Используется LinkedList, так как ArrayList не
  * подходит из-за того, что неизвестно начальное количество объектов для
  * добавления в него и со списком чаще будут выполняться операции добавления, а
- * операции взятия по индеску не будет. Но если будет нужно можно использовать
- * ArrayList
+ * операции взятия по индеску не будет.
  *
  * @author Gregory Orlov <orlov@navtelecom.ru>
  */
@@ -36,7 +35,6 @@ public class ExtendedFileVisitorTask implements Callable<ExtendedScanResult> {
 	@Override
 	public ExtendedScanResult call() throws Exception {
 		LinkedList<Path> tmpPathList = new LinkedList<>();
-		System.out.println("create task for: '"+this.scanPath.toAbsolutePath()+"'");
 		Files.walkFileTree(scanPath, new ExtendedFileVisitor(excludePathList, tempWriter));
 		return new ExtendedScanResult(this.diskName, tmpPathList);
 	}
