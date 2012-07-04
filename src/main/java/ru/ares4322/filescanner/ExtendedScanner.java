@@ -102,15 +102,10 @@ public class ExtendedScanner implements FileScanner {
 
 			tempWriter.flush();
 
-			//разбиваем файл с промежуточными результатами на файлы такого размера, чтобы один такой файл целиком влезал в память.
-			//перед записью на диск сортируем такие файлы
-			List<File> l = ExternalSort.sortInBatch(tempFile.toFile());
-			
-			//сливаем временные файлы в один результирующий.
-			//читаем построчно каждый файл и каждый раз пишем в результирующий файл меньшую строку (лексикографически)
-			ExternalSort.mergeSortedFiles(l, outputParams.outputFilePath.toFile());
+			ExternalSorter externalSorter = ExternalSorterFactory.buildSimpleExternalSorter();
+			externalSorter.sort(tempFile, outputParams.outputFilePath);
 
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			throw new ScanException(ex);
 		} finally {
 			if (tempWriter != null) {

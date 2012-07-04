@@ -3,6 +3,7 @@ package ru.ares4322.filescanner.args;
 import java.nio.file.Paths;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import ru.ares4322.filescanner.UnsupportedOSException;
 import ru.ares4322.filescanner.Utils;
 
 /**
@@ -39,7 +40,7 @@ public class SimpleArgsParserTest {
 				args[1] = "c:\\";
 				break;
 			default:
-				throw new Exception("unsupported operating system");
+				throw new UnsupportedOSException("unsupported operating system");
 		}
 		SimpleArgsParser parser = new SimpleArgsParser();
 		parser.parse(args);
@@ -59,7 +60,7 @@ public class SimpleArgsParserTest {
 				args[1] = "c:\\";
 				break;
 			default:
-				throw new Exception("unsupported operating system");
+				throw new UnsupportedOSException("unsupported operating system");
 		}
 		SimpleArgsParser parser = new SimpleArgsParser();
 		ScanParams result = parser.parse(args);
@@ -84,7 +85,7 @@ public class SimpleArgsParserTest {
 				excludePath = "c:\\";
 				break;
 			default:
-				throw new Exception("unsupported operating system");
+				throw new UnsupportedOSException("unsupported operating system");
 		}
 		String[] args = {searchPath, "-", excludePath};
 		SimpleArgsParser parser = new SimpleArgsParser();
@@ -118,7 +119,7 @@ public class SimpleArgsParserTest {
 				excludePath2 = "C:\\Documents and Settings";
 				break;
 			default:
-				throw new Exception("unsupported operating system");
+				throw new UnsupportedOSException("unsupported operating system");
 		}
 		String[] args = {searchPath1, searchPath2, "-", excludePath1, excludePath2};
 		SimpleArgsParser parser = new SimpleArgsParser();

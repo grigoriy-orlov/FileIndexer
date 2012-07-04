@@ -1,5 +1,6 @@
 package ru.ares4322.filescanner;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,13 +59,11 @@ public class App {
 
 			//можно сделать поддержку переключения сканеров (можно назвать это политиками сканирования)
 			//через параметры командной строки
-			FileScanner scaner = FileScannerFactory.buildSimpleScanner();
+			FileScanner scaner = FileScannerFactory.buildExtendedScanner();
 			scaner.scan(scanParams, outputParams);
 
 			System.out.println("");
 			System.out.println("results are in file: " + resultFilePath.toAbsolutePath());
-		} catch (ArgsParsingException | ParamsProcessingException | ScanException ex) {
-			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex.getMessage()));
 		} catch (Exception ex) {
 			System.err.println(new StringBuilder(2).append("ERROR: ").append(ex.getMessage()));
 		} finally {
@@ -74,7 +73,7 @@ public class App {
 		}
 	}
 
-	public static Path prepareResultFile() throws Exception {
+	public static Path prepareResultFile() throws UnsupportedOSException, IOException {
 		Path resultDirPath;
 		Path resultFilePath;
 		switch (Utils.getOSName()) {
@@ -100,7 +99,7 @@ public class App {
 				}
 				break;
 			default:
-				throw new Exception("unsupported operating system");
+				throw new UnsupportedOSException("unsupported operating system");
 		}
 		return resultFilePath;
 	}

@@ -18,7 +18,8 @@ import java.util.List;
  * быстро. Если это делать потом, то эта информация может быть уже не в кеше и,
  * соответственно, возможно обращение к диску. Каждый файл проверяется на
  * исключение по списку путей исключения. Результаты сканированяи пишутся в
- * файл.
+ * файл. pathDelimeter используется для того, чтобы записанную в одну строку
+ * информацию о файле, можно было потом разнести на несколько строк.
  *
  * @author ares4322
  */
@@ -28,11 +29,17 @@ public class ExtendedFileVisitor implements FileVisitor<Path> {
 	protected List<Path> excludePathList;
 	protected final SimpleDateFormat formatter;
 	private final PrintWriter tempWriter;
+	private final String pathDelimeter;
 
-	public ExtendedFileVisitor(List<Path> excludePathList, PrintWriter tempWriter) {
-		this.excludePathList = excludePathList;
-		this.tempWriter = tempWriter;
-		this.formatter = new SimpleDateFormat("yyyy.MM.dd");
+	public ExtendedFileVisitor(List<Path> excludePathList, PrintWriter tempWriter) throws ScanException {
+		try {
+			this.excludePathList = excludePathList;
+			this.tempWriter = tempWriter;
+			this.formatter = new SimpleDateFormat("yyyy.MM.dd");
+			this.pathDelimeter = Utils.getPathDelimeter();
+		} catch (Exception ex) {
+			throw new ScanException(ex);
+		}
 	}
 
 	/*
@@ -103,9 +110,9 @@ public class ExtendedFileVisitor implements FileVisitor<Path> {
 		try {
 			StringBuilder stringBuilder = new StringBuilder(7);
 			stringBuilder.append(path);
-			stringBuilder.append(" ");
+			stringBuilder.append(this.pathDelimeter);
 			stringBuilder.append(formatter.format(new Date(Files.getLastModifiedTime(path).toMillis())));
-			stringBuilder.append(" ");
+			stringBuilder.append(this.pathDelimeter);
 			stringBuilder.append(Files.size(path));
 			this.tempWriter.println(stringBuilder);
 		} catch (IOException ex) {

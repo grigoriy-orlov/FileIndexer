@@ -100,4 +100,26 @@ public class Utils {
 
 		return os;
 	}
+
+	/**
+	 * Возвращает символ, который запрещен для названия файла в текущей ОС.
+	 *
+	 * @return
+	 * @throws Exception
+	 */
+	public static String getPathDelimeter() throws UnsupportedOSException {
+		String pathDelimeter;
+		switch (Utils.getOSName()) {
+			case LINUX:
+			case MACOS:
+				pathDelimeter = "//";
+				break;
+			case WINDOWS:
+				pathDelimeter = "//";
+				break;
+			default:
+				throw new UnsupportedOSException("unsupported operating system");
+		}
+		return pathDelimeter;
+	}
 }
