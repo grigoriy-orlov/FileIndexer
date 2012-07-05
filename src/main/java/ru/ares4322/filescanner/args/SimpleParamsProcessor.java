@@ -178,7 +178,7 @@ public class SimpleParamsProcessor implements ParamsProcessor {
 			try {
 				diskName = Files.getFileStore(scanPath).name();
 			} catch (IOException ex) {
-				System.err.println(new StringBuilder(4).append("WARNING: can't get filestore of ").append(scanPath).append(", cause: ").append(ex.getMessage()));
+				System.err.println(new StringBuilder(2).append("WARNING: can't get filestore of ").append(scanPath));
 			}
 
 			SortedMap<Path, List<Path>> pathMapForDisk = pathMapsByDisks.get(diskName);

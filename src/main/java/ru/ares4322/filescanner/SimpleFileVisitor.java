@@ -97,7 +97,7 @@ public class SimpleFileVisitor implements FileVisitor<Path> {
 		try {
 			this.scanPathList.add(new FileInfo(path, path.toAbsolutePath().toString(), Files.size(path), new Date(Files.getLastModifiedTime(path).toMillis())));
 		} catch (IOException ex) {
-			System.err.println((new StringBuilder(4)).append("WARNING: Fail save file info for ").append(path).append(", cause: ").append(ex.getMessage()));
+			System.err.println((new StringBuilder(2)).append("WARNING: Fail save file info for ").append(path));
 		}
 	}
 }

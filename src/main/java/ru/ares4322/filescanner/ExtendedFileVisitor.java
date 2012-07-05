@@ -118,7 +118,7 @@ public class ExtendedFileVisitor implements FileVisitor<Path> {
 			stringBuilder.append(Files.size(path));
 			this.tempWriter.println(stringBuilder);
 		} catch (IOException ex) {
-			System.err.println((new StringBuilder(4)).append("WARNING: Fail save file info for ").append(path).append(", cause: ").append(ex.getMessage()));
+			System.err.println((new StringBuilder(2)).append("WARNING: Fail save file info for ").append(path));
 		}
 	}
 }
