@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.SortedMap;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import ru.ares4322.filescanner.Utils;
+import ru.ares4322.filescanner.utils.Utils;
 
 /**
  * @todo тут еще можно сделать проверку раскидывания словарей по дискам

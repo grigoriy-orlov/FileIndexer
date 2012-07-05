@@ -3,8 +3,8 @@ package ru.ares4322.filescanner.args;
 import java.nio.file.Paths;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import ru.ares4322.filescanner.UnsupportedOSException;
-import ru.ares4322.filescanner.Utils;
+import ru.ares4322.filescanner.utils.UnsupportedOSException;
+import ru.ares4322.filescanner.utils.Utils;
 
 /**
  * @todo сделать в тестах определение ОС и установку путей для конкретной ОС

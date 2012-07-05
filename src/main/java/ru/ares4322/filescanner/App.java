@@ -1,5 +1,7 @@
 package ru.ares4322.filescanner;
 
+import ru.ares4322.filescanner.utils.Utils;
+import ru.ares4322.filescanner.utils.UnsupportedOSException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package ru.ares4322.filescanner;
+package ru.ares4322.filescanner.utils;
 
 /**
  *
@@ -21,6 +21,6 @@ public class SortException extends Exception{
 		super(message, cause);
 	}
 
-	
+
 
 }

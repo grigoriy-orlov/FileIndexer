@@ -1,5 +1,6 @@
 package ru.ares4322.filescanner;
 
+import ru.ares4322.filescanner.utils.ScanException;
 import ru.ares4322.filescanner.args.ScanParams;
 
 /**

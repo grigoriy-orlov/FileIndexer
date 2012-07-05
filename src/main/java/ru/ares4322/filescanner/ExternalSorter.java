@@ -1,5 +1,6 @@
 package ru.ares4322.filescanner;
 
+import ru.ares4322.filescanner.utils.SortException;
 import java.nio.file.Path;
 
 /**

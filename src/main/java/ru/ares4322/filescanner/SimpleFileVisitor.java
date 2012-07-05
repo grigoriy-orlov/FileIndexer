@@ -1,5 +1,6 @@
 package ru.ares4322.filescanner;
 
+import ru.ares4322.filescanner.utils.Utils;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;

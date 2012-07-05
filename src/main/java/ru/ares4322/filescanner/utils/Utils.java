@@ -1,4 +1,4 @@
-package ru.ares4322.filescanner;
+package ru.ares4322.filescanner.utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import ru.ares4322.filescanner.FileInfo;
 
 /**
  * Класс различных утилит

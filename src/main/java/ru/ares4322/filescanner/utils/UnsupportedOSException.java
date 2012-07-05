@@ -1,4 +1,4 @@
-package ru.ares4322.filescanner;
+package ru.ares4322.filescanner.utils;
 
 /**
  *

@@ -10,10 +10,10 @@ import java.util.Date;
  */
 public class FileInfo implements Comparable<FileInfo> {
 
-	Path path;
-	String absPath;
-	long size;
-	Date lastModTime;
+	public Path path;
+	public String absPath;
+	public long size;
+	public Date lastModTime;
 
 	public FileInfo() {
 	}
