@@ -77,7 +77,7 @@ public class SimpleFileVisitor implements FileVisitor<Path> {
 		} else {
 			preffix = "Fail visit unknown filesystem entity: ";
 		}
-		System.err.println((new StringBuilder(5)).append("WARNING: ").append(preffix).append(file.toAbsolutePath()));
+		System.err.println((new StringBuilder(3)).append("WARNING: ").append(preffix).append(file.toAbsolutePath()));
 		return FileVisitResult.CONTINUE;
 	}
 

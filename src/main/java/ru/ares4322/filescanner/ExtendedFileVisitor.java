@@ -17,7 +17,7 @@ import java.util.List;
  * при запросе будет уже находится в кеше и доступ к ней будет осуществлен
  * быстро. Если это делать потом, то эта информация может быть уже не в кеше и,
  * соответственно, возможно обращение к диску. Каждый файл проверяется на
- * исключение по списку путей исключения. Результаты сканированяи пишутся в
+ * исключение по списку путей исключения. Результаты сканирования пишутся в
  * файл. pathDelimeter используется для того, чтобы записанную в одну строку
  * информацию о файле, можно было потом разнести на несколько строк.
  *
@@ -89,7 +89,7 @@ public class ExtendedFileVisitor implements FileVisitor<Path> {
 		} else {
 			preffix = "Fail visit unknown filesystem entity: ";
 		}
-		System.err.println((new StringBuilder(5)).append("WARNING: ").append(preffix).append(file.toAbsolutePath()));
+		System.err.println((new StringBuilder(3)).append("WARNING: ").append(preffix).append(file.toAbsolutePath()));
 		return FileVisitResult.CONTINUE;
 	}
 
@@ -103,7 +103,7 @@ public class ExtendedFileVisitor implements FileVisitor<Path> {
 
 	/**
 	 * Добавялет информация о файле в промежуточный файл. Информация пишется в
-	 * одну строку через пробелы, чтобы при итоговой обработке ее можно было
+	 * одну строку через разделители, чтобы при итоговой обработке ее можно было
 	 * легко разбить на составляющие и конвертировать в необходимый формат.
 	 */
 	private void addPath(Path path) {

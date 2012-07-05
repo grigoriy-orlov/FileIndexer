@@ -3,7 +3,6 @@ package ru.ares4322.filescanner;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -34,8 +33,7 @@ public class ExtendedFileVisitorTask implements Callable<ExtendedScanResult> {
 
 	@Override
 	public ExtendedScanResult call() throws Exception {
-		LinkedList<Path> tmpPathList = new LinkedList<>();
 		Files.walkFileTree(scanPath, new ExtendedFileVisitor(excludePathList, tempWriter));
-		return new ExtendedScanResult(this.diskName, tmpPathList);
+		return new ExtendedScanResult(this.diskName);
 	}
 }

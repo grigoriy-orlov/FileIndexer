@@ -1,8 +1,8 @@
 package ru.ares4322.filescanner;
 
 import java.nio.file.Path;
-import java.util.Map.Entry;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.*;
 import ru.ares4322.filescanner.args.ScanParams;
 import ru.ares4322.filescanner.args.SimpleScanParams;
