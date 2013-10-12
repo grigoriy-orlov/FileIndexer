@@ -1,1 +1,5 @@
 /target
+/.idea
+FileScanner.iml
+nb-configuration.xml
+nbactions.xml
